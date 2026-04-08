@@ -1,0 +1,33 @@
+@model SV22T1020581.Models.Sales.OrderViewInfo
+@{
+    var badgeClass = Model.Status switch
+    {
+        1 => "oh-badge--new",
+        2 => "oh-badge--process",
+        3 => "oh-badge--ship",
+        4 => "oh-badge--done",
+        -1 or -2 => "oh-badge--bad",
+        _ => "oh-badge--new"
+    };
+}
+<div class="order-history-row">
+    <div class="order-history-cell">
+        <span class="oh-label">Mã đơn</span>
+        <span class="oh-value oh-value--accent">#@Model.OrderID</span>
+    </div>
+    <div class="order-history-cell">
+        <span class="oh-label">Ngày đặt</span>
+        <span class="oh-value">@Model.OrderTime.ToString("dd/MM/yyyy HH:mm")</span>
+    </div>
+    <div class="order-history-cell">
+        <span class="oh-label">Trạng thái</span>
+        <span class="oh-badge @badgeClass">@Model.StatusDescription</span>
+    </div>
+    <div class="order-history-cell">
+        <span class="oh-label">Tổng tiền</span>
+        <span class="oh-value oh-value--accent">@Model.TotalAmount.ToString("N0")đ</span>
+    </div>
+    <div class="order-history-cell order-history-cell--action">
+        <a href="~/Order/Detail/@Model.OrderID" class="oh-detail-btn">Chi tiết</a>
+    </div>
+</div>

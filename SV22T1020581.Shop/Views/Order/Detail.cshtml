@@ -1,0 +1,155 @@
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = ViewBag.Title ?? "Chi tiết đơn hàng — TechZone";
+}
+@model SV22T1020581.Models.Sales.OrderViewInfo
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb">
+    <a href="~/Order/MyOrders">Đơn hàng</a>
+    <span class="sep">›</span>
+    <span class="current">Chi tiết đơn hàng #@Model.OrderID</span>
+</div>
+
+<div style="max-width:900px;margin:0 auto;padding:24px;">
+
+    <!-- ORDER HEADER -->
+    <div class="checkout-card" style="margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+            <div>
+                <div style="font-family:var(--font-head);font-size:1.6rem;font-weight:900;">Đơn hàng #@Model.OrderID</div>
+                <div style="font-size:.78rem;color:var(--grey);margin-top:4px;">
+                    Đặt ngày @Model.OrderTime.ToString("dd/MM/yyyy lúc HH:mm")
+                </div>
+            </div>
+            @{
+                var statusClass = Model.Status switch
+                {
+                    1 => "status-pending",
+                    2 => "status-processing",
+                    3 => "status-shipping",
+                    4 => "status-completed",
+                    -1 => "status-cancelled",
+                    -2 => "status-cancelled",
+                    _ => "status-pending"
+                };
+            }
+            <span class="order-status @statusClass" style="font-size:.82rem;padding:6px 16px;">
+                @Model.StatusDescription
+            </span>
+        </div>
+
+        <!-- ORDER ITEMS -->
+        @if (ViewBag.Details != null)
+        {
+            foreach (var item in ViewBag.Details)
+            {
+                <div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border);">
+                    <div style="width:60px;height:60px;background:var(--dark);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0;overflow:hidden;">
+                        @if (!string.IsNullOrWhiteSpace(item.Photo))
+                        {
+                            <img src="~/images/products/@item.Photo" alt="@item.ProductName"
+                                 style="width:100%;height:100%;object-fit:cover;">
+                        }
+                        else
+                        {
+                            <img src="~/images/placeholder-product.png" alt="" style="width:100%;height:100%;object-fit:contain;padding:6px;">
+                        }
+                    </div>
+                    <div style="flex:1;">
+                        <div style="font-weight:600;font-size:.88rem;">@item.ProductName</div>
+                        <div style="font-size:.72rem;color:var(--grey);">x @item.Quantity · @item.Unit · @item.SalePrice.ToString("N0")đ</div>
+                    </div>
+                    <div style="font-family:var(--font-head);font-size:1.1rem;font-weight:700;color:var(--blue-bright);">
+                        @item.TotalAmount.ToString("N0")đ
+                    </div>
+                </div>
+            }
+        }
+
+        <!-- ADDRESS -->
+        <div style="background:var(--dark);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;margin-top:16px;">
+            <div style="font-size:.72rem;font-weight:700;color:var(--grey);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">
+                📍 Địa chỉ giao hàng
+            </div>
+            <div style="font-size:.88rem;color:var(--white);">@(Model.DeliveryAddress ?? "—")</div>
+            <div style="font-size:.78rem;color:var(--grey);margin-top:4px;">
+                👤 @(Model.CustomerName ?? "—") · @(Model.CustomerPhone ?? "—")
+            </div>
+        </div>
+
+        <!-- TOTAL -->
+        <div style="display:flex;justify-content:space-between;align-items:center;padding-top:16px;border-top:1px solid var(--border);margin-top:8px;">
+            <span style="font-size:.84rem;color:var(--grey);font-weight:600;">Tổng cộng</span>
+            <span style="font-family:var(--font-head);font-size:1.8rem;font-weight:900;color:var(--blue-bright);">
+                @Model.TotalAmount.ToString("N0")đ
+            </span>
+        </div>
+    </div>
+
+    <!-- TIMELINE TRACKING -->
+    <div class="checkout-card">
+        <div style="font-family:var(--font-head);font-size:1.1rem;font-weight:700;margin-bottom:20px;">
+            🗺️ Trạng thái vận chuyển
+        </div>
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-dot dot-done">✓</div>
+                <div class="timeline-content">
+                    <div class="timeline-title">Đặt hàng thành công</div>
+                    <div class="timeline-desc">Đơn hàng của bạn đã được tiếp nhận</div>
+                    <div class="timeline-time">🕐 @Model.OrderTime.ToString("dd/MM/yyyy HH:mm")</div>
+                </div>
+            </div>
+            <div class="timeline-item">
+                @{
+                    var confirmDone = Model.AcceptTime.HasValue || Model.Status >= 2;
+                }
+                <div class="timeline-dot @(confirmDone ? "dot-done" : "dot-pending")">@(confirmDone ? "✓" : "○")</div>
+                <div class="timeline-content">
+                    <div class="timeline-title" style="@(confirmDone ? "" : "color:var(--grey)")">Đã xác nhận</div>
+                    @if (Model.AcceptTime.HasValue)
+                    {
+                        <div class="timeline-time">🕐 @Model.AcceptTime.Value.ToString("dd/MM/yyyy HH:mm")</div>
+                    }
+                </div>
+            </div>
+            <div class="timeline-item">
+                @{
+                    var shipDone = Model.ShippedTime.HasValue || Model.Status >= 3;
+                }
+                <div class="timeline-dot @(shipDone ? "dot-done" : "dot-pending")">@(shipDone ? "✓" : "○")</div>
+                <div class="timeline-content">
+                    <div class="timeline-title" style="@(shipDone ? "" : "color:var(--grey)")">
+                        @(Model.Status >= 4 ? "Giao hàng thành công" : "Đang vận chuyển")
+                    </div>
+                    @if (Model.ShippedTime.HasValue)
+                    {
+                        <div class="timeline-time">🕐 @Model.ShippedTime.Value.ToString("dd/MM/yyyy HH:mm")</div>
+                    }
+                </div>
+            </div>
+            @if (Model.Status >= 4)
+            {
+                <div class="timeline-item">
+                    <div class="timeline-dot dot-done">✓</div>
+                    <div class="timeline-content">
+                        <div class="timeline-title">Giao hàng thành công</div>
+                        @if (Model.FinishedTime.HasValue)
+                        {
+                            <div class="timeline-time">🕐 @Model.FinishedTime.Value.ToString("dd/MM/yyyy HH:mm")</div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- BACK -->
+    <div style="margin-top:16px;">
+        <a href="~/Order/MyOrders"
+           style="display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border:1.5px solid var(--border);border-radius:var(--radius-sm);text-decoration:none;font-size:.82rem;color:var(--grey);transition:var(--transition);">
+            ← Quay lại danh sách đơn hàng
+        </a>
+    </div>
+</div>

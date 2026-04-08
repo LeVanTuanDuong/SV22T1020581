@@ -1,0 +1,149 @@
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = ViewBag.Title ?? "Chi tiết sản phẩm — TechZone";
+}
+@model SV22T1020581.Models.Catalog.Product
+@{
+    var catName = (ViewBag.Categories as IEnumerable<SV22T1020581.Models.Catalog.Category>)
+        ?.FirstOrDefault(c => c.CategoryID == Model.CategoryID)?.CategoryName ?? "";
+}
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb">
+    <a href="~/">Trang chủ</a>
+    <span class="sep">›</span>
+    <a href="~/Product">Danh mục</a>
+    <span class="sep">›</span>
+    @if (!string.IsNullOrEmpty(catName))
+    {
+        <a href="~/Product?categoryID=@Model.CategoryID">@catName</a>
+        <span class="sep">›</span>
+    }
+    <span class="current">@Model.ProductName</span>
+</div>
+
+<!-- PRODUCT DETAIL -->
+<div class="detail-layout">
+    <!-- HÌNH ẢNH -->
+    <div class="detail-img-box">
+        @if (!string.IsNullOrWhiteSpace(Model.Photo))
+        {
+            <img src="~/images/products/@Model.Photo" alt="@Model.ProductName">
+        }
+        else
+        {
+            <img src="~/images/placeholder-product.png" alt="" class="detail-placeholder-img">
+        }
+    </div>
+
+    <!-- THÔNG TIN -->
+    <div class="detail-info">
+        <div class="detail-cat">@(catName)</div>
+        <div class="detail-name">@Model.ProductName</div>
+
+        <!-- Đánh giá -->
+        <div class="detail-rating">
+            <span style="color:var(--gold);font-size:16px;">★★★★★</span>
+            <span style="font-weight:700;font-size:.88rem;">4.8</span>
+            <span style="font-size:.8rem;color:var(--grey);">(248 đánh giá)</span>
+            <span style="font-size:.8rem;color:var(--grey);">| Đã bán: 1.2k</span>
+        </div>
+
+        <!-- GIÁ -->
+        <div class="detail-price-row">
+            <div class="detail-price">@Model.Price.ToString("N0")đ</div>
+            @if (Model.Price > 0)
+            {
+                <span class="detail-old">@((Model.Price * 1.2m).ToString("N0"))đ</span>
+                <span class="detail-save">Tiết kiệm 17%</span>
+            }
+        </div>
+
+        <!-- MÔ TẢ -->
+        @if (!string.IsNullOrWhiteSpace(Model.ProductDescription))
+        {
+            <div class="detail-desc">@Model.ProductDescription</div>
+        }
+
+        <!-- ĐƠN VỊ -->
+        <div style="font-size:.84rem;color:var(--grey);margin-bottom:14px;">
+            <strong>Đơn vị tính:</strong> @Model.Unit
+        </div>
+
+        <!-- SỐ LƯỢNG -->
+        <div class="qty-selector">
+            <label>Số lượng:</label>
+            <div class="qty-ctrl">
+                <button onclick="changeQty(-1)">−</button>
+                <input type="number" id="detailQtyInput" value="1" min="1" max="999"
+                       style="border:1.5px solid var(--border);border-radius:6px;padding:4px 8px;font-size:1rem;font-weight:700;width:52px;text-align:center;background:var(--dark);color:var(--white);outline:none;">
+                <button onclick="changeQty(1)">+</button>
+            </div>
+            <span style="font-size:.78rem;color:var(--grey);">Còn 56 sản phẩm</span>
+        </div>
+        <input type="hidden" id="productIdValue" value="@Model.ProductID">
+
+        <!-- NÚT HÀNH ĐỘNG -->
+        <div class="detail-btns">
+            <button class="detail-btn-cart" onclick="addToCartFromDetail()">
+                🛒 Thêm vào giỏ hàng
+            </button>
+            <button class="detail-btn-buy" onclick="buyNow()">
+                ⚡ Mua ngay
+            </button>
+        </div>
+
+        <!-- CAM KẾT -->
+        <div class="detail-commitment">
+            <div class="commitment-item">
+                ✅ Hàng chính hãng
+            </div>
+            <div class="commitment-item">
+                🚚 Giao 2-3 ngày
+            </div>
+            <div class="commitment-item">
+                🔄 Đổi trả 30 ngày
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SẢN PHẨM LIÊN QUAN -->
+@if (ViewBag.RelatedProducts != null && ((IEnumerable<dynamic>)ViewBag.RelatedProducts).Any())
+{
+    <div style="max-width:1280px;margin:0 auto;padding:0 24px 32px;">
+        <div class="section-head">
+            <h2>🛍️ Sản phẩm <span>cùng danh mục</span></h2>
+            <a class="see-all" href="~/Product?categoryID=@Model.CategoryID">Xem thêm →</a>
+        </div>
+        <div class="product-grid">
+            @foreach (var item in ViewBag.RelatedProducts)
+            {
+                <div class="product-card" onclick="window.location.href='/Product/Detail/@item.ProductID'">
+                    <div class="product-img">
+                        @if (!string.IsNullOrWhiteSpace(item.Photo))
+                        {
+                            <img src="~/images/products/@item.Photo" alt="@item.ProductName" loading="lazy">
+                        }
+                        else
+                        {
+                            <img src="~/images/placeholder-product.png" alt="" loading="lazy" class="product-placeholder-img">
+                        }
+                    </div>
+                    <div class="product-info">
+                        <div class="product-name">@item.ProductName</div>
+                        <div class="price-row">
+                            <span class="price-now">@item.Price.ToString("N0")đ</span>
+                        </div>
+                    </div>
+                    <div class="product-actions">
+                        <button class="btn-cart" onclick="event.stopPropagation(); addToCart(@item.ProductID, 1)">
+                            + Giỏ hàng
+                        </button>
+                        <button class="btn-wish" onclick="event.stopPropagation(); toast('❤️ Đã thêm vào yêu thích')">♡</button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}

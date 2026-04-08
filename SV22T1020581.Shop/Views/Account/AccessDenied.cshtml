@@ -1,0 +1,25 @@
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Từ chối truy cập — TechZone";
+}
+
+<div class="denied-wrap">
+    <div class="denied-card">
+        <div class="denied-icon">🔒</div>
+        <div class="denied-title">Từ chối truy cập</div>
+        <div class="denied-sub">
+            Bạn không có quyền truy cập trang này.<br>
+            Vui lòng đăng nhập hoặc liên hệ quản trị viên.
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+            <a href="~/Account/Login"
+               style="display:block;padding:13px;text-align:center;background:var(--blue);color:#fff;border:none;border-radius:var(--radius-sm);font-family:var(--font-head);font-size:1rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;text-decoration:none;transition:var(--transition);">
+                🔐 Đăng nhập
+            </a>
+            <a href="~/"
+               style="display:block;text-align:center;padding:12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);text-decoration:none;font-size:.84rem;color:var(--grey);transition:var(--transition);">
+                ← Về trang chủ
+            </a>
+        </div>
+    </div>
+</div>

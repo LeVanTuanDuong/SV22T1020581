@@ -1,0 +1,155 @@
+@{
+    ViewBag.Title = "Đăng nhập";
+    Layout = null;
+}
+<!doctype html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <title>Đăng nhập — TNP Shop</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <link rel="stylesheet" href="~/lib/overlay-scrollbars/overlayscrollbars.min.css">
+    <link rel="stylesheet" href="~/lib/bootstrap/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/lib/adminlte/css/adminlte.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <style>
+        .field-wrapper {
+            margin-bottom: 16px;
+        }
+        .field-wrapper.field-email {
+            margin-bottom: 4px;
+        }
+        .field-wrapper.field-password {
+            margin-bottom: 10px;
+        }
+        .field-input-inner {
+            position: relative;
+        }
+        .field-input-inner .form-control {
+            padding-right: 2.75rem;
+        }
+        .field-input-inner .field-end-icon {
+            position: absolute;
+            right: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            margin: 0;
+            padding: 0;
+            width: 2rem;
+            height: calc(100% - 4px);
+            max-height: 2.25rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #6c757d;
+            z-index: 4;
+            border: none;
+            background: transparent;
+            box-shadow: none;
+            line-height: 1;
+            font-size: 1.1rem;
+        }
+        .field-input-inner .field-end-icon:hover {
+            color: #0d6efd;
+        }
+        .field-input-inner .field-end-icon:focus-visible {
+            outline: 2px solid rgba(13, 110, 253, 0.45);
+            outline-offset: 1px;
+        }
+        .field-wrapper .form-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 6px;
+            display: block;
+        }
+        .login-fail-line {
+            font-size: 13px;
+            color: #dc3545;
+            margin-top: 6px;
+            margin-bottom: 0;
+            font-weight: 500;
+            line-height: 1.35;
+        }
+    </style>
+</head>
+
+<body class="login-page bg-body-secondary">
+    <div class="login-box">
+        <div class="login-logo">
+            <a href="#"><b>TNP</b> Shop</a>
+        </div>
+
+        <div class="card">
+            <div class="card-body login-card-body">
+
+                <p class="login-box-msg">Đăng nhập hệ thống</p>
+
+                <form method="post" action="@Url.Action("Login", "Account")">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+
+                    <div class="field-wrapper field-email">
+                        <label class="form-label" for="email">Email</label>
+                        <div class="field-input-inner">
+                            <input type="email"
+                                   name="username"
+                                   id="email"
+                                   class="form-control"
+                                   placeholder="Nhập email đăng nhập"
+                                   value="@ViewBag.Username"
+                                   autofocus />
+                            <span class="field-end-icon" aria-hidden="true"><i class="bi bi-envelope"></i></span>
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper field-password">
+                        <label class="form-label" for="password">Mật khẩu</label>
+                        <div class="field-input-inner">
+                            <input type="password"
+                                   name="password"
+                                   id="password"
+                                   class="form-control"
+                                   placeholder="Nhập mật khẩu"
+                                   value="@ViewBag.Password" />
+                            <button type="button" class="field-end-icon" onclick="togglePassword()" id="toggle-pwd-icon" title="Hiện / ẩn mật khẩu" aria-label="Hiện hoặc ẩn mật khẩu">
+                                <span class="bi bi-eye"></span>
+                            </button>
+                        </div>
+                        @if (ViewData.ModelState.ContainsKey("Error") && ViewData.ModelState["Error"]?.Errors.Count > 0)
+                        {
+                            <p class="login-fail-line" role="alert">Thông tin đăng nhập chưa đúng</p>
+                        }
+                    </div>
+
+                    <div class="d-grid gap-2 mt-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập
+                        </button>
+                    </div>
+                </form>
+
+                <script>
+                    function togglePassword() {
+                        var pwd = document.getElementById('password');
+                        var icon = document.getElementById('toggle-pwd-icon').querySelector('.bi');
+                        if (pwd.type === 'password') {
+                            pwd.type = 'text';
+                            icon.className = 'bi bi-eye-slash';
+                        } else {
+                            pwd.type = 'password';
+                            icon.className = 'bi bi-eye';
+                        }
+                    }
+                </script>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/overlay-scrollbars/overlayscrollbars.browser.es6.min.js"></script>
+    <script src="~/lib/popperjs/popper.min.js"></script>
+    <script src="~/lib/bootstrap/bootstrap.bundle.min.js"></script>
+    <script type="module" src="~/lib/adminlte/js/adminlte.js"></script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+﻿<div class="card card-primary card-outline shadow-sm">
+    <div class="card-header">
+        <h3 class="card-title fw-bold text-primary">
+            <i class="bi bi-box-seam-fill"></i> Thêm mặt hàng mới
+        </h3>
+    </div>
+
+    <form action="~/Product/Create" method="post" enctype="multipart/form-data">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tên mặt hàng:</label>
+                        <input type="text" class="form-control" name="ProductName" required autofocus>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Danh mục:</label>
+                            <select class="form-select" name="CategoryID">
+                                <option value="">-- Chọn danh mục --</option>
+                                <option value="1">Máy ảnh</option>
+                                <option value="2">Ống kính</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Nhà cung cấp:</label>
+                            <select class="form-select" name="SupplierID">
+                                <option value="">-- Chọn nhà cung cấp --</option>
+                                <option value="1">Sony Việt Nam</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Đơn vị tính:</label>
+                            <input type="text" class="form-control" name="Unit" placeholder="Cái, Chiếc, Bộ...">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Giá mặt hàng:</label>
+                            <input type="number" class="form-control" name="Price" min="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Ảnh minh họa:</label>
+                        <input type="file" class="form-control mb-2" name="uploadPhoto"
+                               onchange="document.getElementById('PhotoPreview').src = window.URL.createObjectURL(this.files[0])">
+                        <div class="text-center border rounded p-2 bg-light">
+                            <img id="PhotoPreview" src="~/images/products/no-image.png"
+                                 class="img-fluid" style="max-height: 200px;" alt="Preview">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer text-end">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-save"></i> Lưu mặt hàng
+            </button>
+            <a href="~/Product" class="btn btn-secondary border">Hủy bỏ</a>
+        </div>
+    </form>
+</div>

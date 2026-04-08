@@ -1,0 +1,81 @@
+﻿@using SV22T1020581.Models.Sales
+@model SV22T1020581.Models.Common.PagedResult<SV22T1020581.Models.Sales.OrderViewInfo>
+@{
+    Layout = null;
+}
+
+<div class="mb-2 text-muted">
+    Danh sách này có <strong>@Model.RowCount</strong> đơn hàng
+</div>
+
+<div class="card">
+    <div class="card-body p-1">
+        <table class="table table-bordered table-hover mb-0 align-middle">
+            <thead class="table-secondary">
+                <tr>
+                    <th>Ngày đặt hàng</th>
+                    <th>Tên khách hàng</th>
+                    <th>Điện thoại</th>
+                    <th>Ngày duyệt</th>
+                    <th>Nhân viên xử lý</th>
+                    <th class="text-end">Tổng tiền</th>
+                    <th class="text-center" style="width:140px;">Trạng thái</th>
+                    <th class="text-center" style="width:40px"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.DataItems)
+                {
+                    <tr>
+                        <td>@item.OrderTime.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>@(item.CustomerName ?? "")</td>
+                        <td>@(item.CustomerPhone ?? "")</td>
+                        <td>@(item.AcceptTime?.ToString("dd/MM/yyyy") ?? "")</td>
+                        <td>@(item.EmployeeName ?? "")</td>
+                        <td class="text-end">@item.TotalAmount.ToString("N0")</td>
+                        <td class="text-center">
+                            <span class="badge @OrderSearchBadgeClass(item.Status)">@OrderStatusExtensions.GetDisplayLabel(item.Status)</span>
+                        </td>
+                        <td class="text-center text-nowrap">
+                            <a href="~/Order/Detail/@item.OrderID" class="btn btn-sm btn-primary">
+                                <i class="bi bi-receipt"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card-footer">
+        <ul class="pagination justify-content-center mb-0">
+            @foreach (var p in Model.GetDisplayPages())
+            {
+                if (p.IsEllipsis)
+                {
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                }
+                else
+                {
+                    <li class="page-item @(p.IsCurrent ? "active" : "")">
+                        <a class="page-link" href="javascript:;"
+                           onclick="paginationSearch(event, document.getElementById('formSearch'), @p.Page)">@p.Page</a>
+                    </li>
+                }
+            }
+        </ul>
+    </div>
+</div>
+
+@functions {
+    private static string OrderSearchBadgeClass(int s) => s switch
+    {
+        1 => "bg-warning text-dark",
+        2 => "bg-info",
+        3 => "bg-primary",
+        4 => "bg-success",
+        -1 => "bg-secondary",
+        -2 => "bg-danger",
+        _ => "bg-secondary"
+    };
+}

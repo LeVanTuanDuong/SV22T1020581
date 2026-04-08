@@ -1,0 +1,198 @@
+﻿@using System.Globalization
+@using SV22T1020581.Models.Catalog
+@using SV22T1020581.Models.Partner
+@{
+    ViewBag.Title = "Quản lý Mặt hàng";
+    var categories = ViewBag.Categories as IEnumerable<Category> ?? Enumerable.Empty<Category>();
+    var suppliers = ViewBag.Suppliers as IEnumerable<Supplier> ?? Enumerable.Empty<Supplier>();
+
+    decimal minP = 0, maxP = 0;
+    if (ViewBag.MinPriceNum != null) { minP = Convert.ToDecimal(ViewBag.MinPriceNum); }
+    if (ViewBag.MaxPriceNum != null) { maxP = Convert.ToDecimal(ViewBag.MaxPriceNum); }
+    // Phẩy phân tách hàng nghìn (InvariantCulture: nhóm hàng nghìn = dấu phẩy)
+    var minPriceDisplay = minP > 0 ? ((long)Math.Truncate(minP)).ToString("#,##0", CultureInfo.InvariantCulture) : "";
+    var maxPriceDisplay = maxP > 0 ? ((long)Math.Truncate(maxP)).ToString("#,##0", CultureInfo.InvariantCulture) : "";
+}
+@model SV22T1020581.Models.Common.PagedResult<SV22T1020581.Models.Catalog.Product>
+@section PageToolBar {
+    <a href="~/Product/Create" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-1"></i>
+        Bổ sung
+    </a>
+}
+
+<div class="card mb-3">
+    <div class="card-body">
+        <form id="formSearch" method="get" action="~/Product">
+            <div class="row g-2">
+                <div class="col-md-3">
+                    <label class="form-label">Loại hàng</label>
+                    <select name="CategoryID" class="form-select">
+                        <option value="">-- Tất cả --</option>
+                        @foreach (var c in categories)
+                        {
+                            if (ViewBag.CategoryID as int? == c.CategoryID)
+                            {
+                                <option value="@c.CategoryID" selected>@c.CategoryName</option>
+                            }
+                            else
+                            {
+                                <option value="@c.CategoryID">@c.CategoryName</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Nhà cung cấp</label>
+                    <select name="SupplierID" class="form-select">
+                        <option value="">-- Tất cả --</option>
+                        @foreach (var s in suppliers)
+                        {
+                            if (ViewBag.SupplierID as int? == s.SupplierID)
+                            {
+                                <option value="@s.SupplierID" selected>@s.SupplierName</option>
+                            }
+                            else
+                            {
+                                <option value="@s.SupplierID">@s.SupplierName</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Khoảng giá</label>
+                    <div class="input-group">
+                        <input type="text" name="minPrice" class="form-control price-range-filter" placeholder="Từ" value="@minPriceDisplay" autocomplete="off" inputmode="numeric" />
+                        <span class="input-group-text">-</span>
+                        <input type="text" name="maxPrice" class="form-control price-range-filter" placeholder="Đến" value="@maxPriceDisplay" autocomplete="off" inputmode="numeric" />
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Tên mặt hàng</label>
+                    <div class="input-group">
+                        <input type="text" name="SearchValue" value="@(ViewBag.SearchValue ?? "")" class="form-control" placeholder="Tên mặt hàng..." autofocus />
+                        <button type="submit" class="btn btn-info d-flex align-items-center">
+                            <i class="bi bi-search me-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="mb-2 text-muted">
+    Danh sách này có <strong>@Model.RowCount</strong> mặt hàng
+</div>
+
+<div class="card">
+    <div class="card-body p-1">
+        <table class="table table-bordered table-hover mb-0 align-middle">
+            <thead class="table-secondary">
+                <tr>
+                    <th style="width:80px;">Ảnh</th>
+                    <th>Mặt hàng</th>
+                    <th style="width:120px;">Đơn vị</th>
+                    <th style="width:120px;">Giá</th>
+                    <th class="text-center" style="width:140px;">Trạng thái</th>
+                    <th class="text-center" style="width:100px;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.DataItems)
+                {
+                    var img = string.IsNullOrWhiteSpace(item.Photo) ? "nophoto.png" : item.Photo;
+                    <tr>
+                        <td class="text-center">
+                            <img src="~/images/products/@img" class="img-thumbnail" alt="" style="max-height:48px;" onerror="this.src='@Url.Content("~/images/products/nophoto.png")'" />
+                        </td>
+                        <td>
+                            <strong>@item.ProductName</strong><br />
+                            <small class="text-muted">@(item.ProductDescription ?? "")</small>
+                        </td>
+                        <td>@item.Unit</td>
+                        <td class="text-end">@item.Price.ToString("N0")</td>
+                        <td class="text-center">
+                            @if (item.IsSelling)
+                            {
+                                <span class="badge bg-success">Đang bán</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Ngừng bán</span>
+                            }
+                        </td>
+                        <td class="text-center text-nowrap">
+                            <a href="~/Product/Edit/@item.ProductID" class="btn btn-sm btn-primary">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="~/Product/Delete/@item.ProductID" class="btn btn-sm btn-danger">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card-footer">
+        <ul class="pagination justify-content-center mb-0">
+            @foreach (var p in Model.GetDisplayPages())
+            {
+                if (p.IsEllipsis)
+                {
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                }
+                else
+                {
+                    <li class="page-item @(p.IsCurrent ? "active" : "")">
+                        <a class="page-link"
+                           href="~/Product?Page=@p.Page&PageSize=@Model.PageSize&SearchValue=@(ViewBag.SearchValue ?? "")&CategoryID=@(ViewBag.CategoryID)&SupplierID=@(ViewBag.SupplierID)&minPrice=@minP.ToString(CultureInfo.InvariantCulture)&maxPrice=@maxP.ToString(CultureInfo.InvariantCulture)">@p.Page</a>
+                    </li>
+                }
+            }
+        </ul>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    (function () {
+        var form = document.getElementById('formSearch');
+        if (!form) return;
+
+        function digitsOnly(s) {
+            return String(s || '').replace(/\D/g, '');
+        }
+
+        function formatCommas(digits) {
+            if (!digits) return '';
+            return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        form.querySelectorAll('.price-range-filter').forEach(function (input) {
+            // Khi focus: chỉ còn chữ số — tránh AutoNumeric / format liên tục làm con trỏ nhảy
+            input.addEventListener('focus', function () {
+                var d = digitsOnly(input.value);
+                input.value = d;
+            });
+            // Khi rời ô: thêm dấu phẩy ngăn cách hàng nghìn
+            input.addEventListener('blur', function () {
+                var d = digitsOnly(input.value);
+                input.value = d ? formatCommas(d) : '';
+            });
+        });
+
+        // Gửi số thuần (không dấu phẩy) để model binding decimal đúng
+        form.addEventListener('submit', function () {
+            form.querySelectorAll('.price-range-filter').forEach(function (input) {
+                input.value = digitsOnly(input.value);
+            });
+        });
+    })();
+</script>
+}

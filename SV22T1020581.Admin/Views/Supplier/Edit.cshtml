@@ -1,0 +1,228 @@
+@{
+}
+@model SV22T1020581.Models.Partner.Supplier
+<style>
+    .field-error {
+        border-color: #dc3545 !important;
+        background-color: #fff8f8 !important;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.15);
+    }
+    .field-error-message {
+        color: #dc3545;
+        font-size: 0.85rem;
+        margin-top: 4px;
+        display: none;
+    }
+    .field-error-message.show {
+        display: block;
+    }
+</style>
+@section PageToolBar {
+    <button type="submit" form="formEdit" class="btn btn-primary">
+        <i class="bi bi-save"></i>
+        Lưu dữ liệu
+    </button>
+
+    <a href="~/Supplier" class="btn btn-secondary ms-1">
+        <i class="bi bi-arrow-left"></i>
+        Quay lại
+    </a>
+}
+<div class="row justify-content-center">
+    <div class="col-12">
+        <div class="card card-primary card-outline">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-truck me-2"></i>
+                    Thông tin nhà cung cấp
+                </h5>
+            </div>
+
+            <div class="card-body">
+                <form id="formEdit" method="post" action="~/Supplier/Save" novalidate>
+                    <input type="hidden" name="SupplierID" value="@Model.SupplierID" />
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tên nhà cung cấp:</label>
+                        <input type="text"
+                               class="form-control"
+                               name="SupplierName"
+                               id="SupplierName"
+                               value="@Model.SupplierName"
+                               placeholder="Nhập tên nhà cung cấp"
+                               autofocus />
+                        <div class="field-error-message" id="SupplierName-error">Vui lòng nhập Tên nhà cung cấp</div>
+                        @Html.ValidationMessage("SupplierName", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tên giao dịch:</label>
+                        <input type="text"
+                               class="form-control"
+                               name="ContactName"
+                               id="ContactName"
+                               value="@Model.ContactName"
+                               placeholder="Nhập tên giao dịch" />
+                        <div class="field-error-message" id="ContactName-error">Vui lòng nhập Tên giao dịch</div>
+                        @Html.ValidationMessage("ContactName", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Điện thoại:</label>
+                            <input type="tel"
+                                   class="form-control"
+                                   name="Phone"
+                                   id="Phone"
+                                   value="@Model.Phone"
+                                   placeholder="Nhập số điện thoại" />
+                            <div class="field-error-message" id="Phone-error">Vui lòng nhập Điện thoại</div>
+                            <div class="field-error-message" id="Phone-notdigit-error">Số điện thoại chỉ được nhập số (0-9) và dấu chấm (.)</div>
+                            @Html.ValidationMessage("Phone", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Email:</label>
+                            @if (Model.SupplierID == 0)
+                            {
+                                <input type="email"
+                                       class="form-control"
+                                       name="Email"
+                                       id="Email"
+                                       value="@Model.Email"
+                                       placeholder="Nhập địa chỉ email" />
+                                <div class="field-error-message" id="Email-error">Vui lòng nhập Email</div>
+                                <div class="field-error-message" id="Email-at-error">Email phải chứa ký tự @@</div>
+                            }
+                            else
+                            {
+                                <input type="email"
+                                       class="form-control"
+                                       name="Email"
+                                       id="Email"
+                                       value="@Model.Email"
+                                       placeholder="Nhập email" />
+                                <div class="field-error-message" id="Email-error">Vui lòng nhập Email</div>
+                            }
+                            @Html.ValidationMessage("Email", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Địa chỉ:</label>
+                        <textarea class="form-control"
+                                  rows="3"
+                                  name="Address"
+                                  id="Address"
+                                  placeholder="Nhập địa chỉ">@Model.Address</textarea>
+                        <div class="field-error-message" id="Address-error">Vui lòng nhập Địa chỉ</div>
+                        @Html.ValidationMessage("Address", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tỉnh / Thành:</label>
+                        <select class="form-select"
+                                name="Province"
+                                id="Province">
+                            <option value="">-- Chọn tỉnh / thành --</option>
+                            @foreach (var p in (IReadOnlyList<SV22T1020581.Models.DataDictionary.Province>)(ViewBag.Provinces ?? new List<SV22T1020581.Models.DataDictionary.Province>()))
+                            {
+                                if (p.ProvinceName == Model.Province)
+                                {
+                                    <option value="@p.ProvinceName" selected>@p.ProvinceName</option>
+                                }
+                                else
+                                {
+                                    <option value="@p.ProvinceName">@p.ProvinceName</option>
+                                }
+                            }
+                        </select>
+                        <div class="field-error-message" id="Province-error">Vui lòng nhập Tỉnh / Thành</div>
+                        @Html.ValidationMessage("Province", new { @class = "text-danger" })
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var supplierId = @Model.SupplierID;
+    var AT_CHAR = @Html.Raw("'@'");
+    document.getElementById('formEdit').addEventListener('submit', function (e) {
+        var isValid = true;
+        var fields = [
+            { id: 'SupplierName', errorId: 'SupplierName-error' },
+            { id: 'ContactName', errorId: 'ContactName-error' },
+            { id: 'Phone', errorId: 'Phone-error' },
+            { id: 'Email', errorId: 'Email-error' },
+            { id: 'Address', errorId: 'Address-error' },
+            { id: 'Province', errorId: 'Province-error' }
+        ];
+
+        fields.forEach(function (field) {
+            var input = document.getElementById(field.id);
+            var errorMsg = document.getElementById(field.errorId);
+
+            if (!input || !errorMsg) return;
+
+            // Reset
+            input.classList.remove('field-error');
+            errorMsg.classList.remove('show');
+
+            var value = input.value.trim();
+            var isEmpty = value === '' || value === '-- Chọn tỉnh / thành --';
+
+            // Email validation: must contain AT when adding new supplier
+            if (field.id === 'Email' && !isEmpty) {
+                var emailValue = input.value.trim();
+                if (supplierId == 0 && emailValue.toLowerCase().indexOf(AT_CHAR) === -1) {
+                    input.classList.add('field-error');
+                    errorMsg.classList.add('show');
+                    isValid = false;
+                    return;
+                }
+            }
+
+            // Phone: must be digits only
+            if (field.id === 'Phone' && !isEmpty) {
+                if (!/^[\d.]+$/.test(value)) {
+                    input.classList.add('field-error');
+                    document.getElementById('Phone-error').classList.remove('show');
+                    document.getElementById('Phone-notdigit-error').classList.add('show');
+                    isValid = false;
+                    return;
+                }
+            }
+
+            if (isEmpty) {
+                input.classList.add('field-error');
+                errorMsg.classList.add('show');
+                isValid = false;
+            }
+        });
+
+        if (!isValid) {
+            e.preventDefault();
+        }
+    });
+
+    // Remove error state on input
+    ['SupplierName', 'ContactName', 'Phone', 'Email', 'Address', 'Province'].forEach(function (id) {
+        var input = document.getElementById(id);
+        if (!input) return;
+        input.addEventListener('input', function () {
+            input.classList.remove('field-error');
+            var errorMsg = document.getElementById(id + '-error');
+            if (errorMsg) errorMsg.classList.remove('show');
+            var notDigit = document.getElementById(id + '-notdigit-error');
+            if (notDigit) notDigit.classList.remove('show');
+        });
+        input.addEventListener('change', function () {
+            input.classList.remove('field-error');
+            var errorMsg = document.getElementById(id + '-error');
+            if (errorMsg) errorMsg.classList.remove('show');
+            var notDigit = document.getElementById(id + '-notdigit-error');
+            if (notDigit) notDigit.classList.remove('show');
+        });
+    });
+</script>

@@ -1,0 +1,145 @@
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Giỏ hàng — TechZone";
+}
+@model IEnumerable<SV22T1020581.Models.Sales.OrderDetailViewInfo>
+
+<div class="cart-layout">
+    <!-- CART ITEMS -->
+    <div>
+        <div class="cart-items">
+            <div class="cart-header">
+                <span>🛒 Giỏ hàng</span>
+                @if (Model != null && Model.Any())
+                {
+                    <span style="font-size:.78rem;color:var(--grey);font-weight:400;">
+                        @(Model.Sum(m => m.Quantity)) sản phẩm
+                    </span>
+                }
+            </div>
+
+            @if (Model != null && Model.Any())
+            {
+                @foreach (var item in Model)
+                {
+                    <div class="cart-item">
+                        <div class="cart-item-img">
+                            @if (!string.IsNullOrWhiteSpace(item.Photo))
+                            {
+                                <img src="~/images/products/@item.Photo" alt="@item.ProductName">
+                            }
+                            else
+                            {
+                                <img src="~/images/placeholder-product.png" alt="" class="cart-placeholder-img">
+                            }
+                        </div>
+                        <div class="cart-item-info">
+                            <div class="cart-item-name">
+                                <a href="~/Product/Detail/@item.ProductID"
+                                   style="text-decoration:none;color:var(--white);">
+                                    @item.ProductName
+                                </a>
+                            </div>
+                            <div class="cart-item-cat">@item.Unit</div>
+                            <div class="cart-item-price">@item.TotalAmount.ToString("N0")đ</div>
+                            <div class="cart-item-actions">
+                                <!-- Decrease -->
+                                <form asp-controller="Cart" asp-action="Update" method="post" style="display:inline;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="productID" value="@item.ProductID">
+                                    <input type="hidden" name="quantity" value="@(item.Quantity - 1)">
+                                    <button type="submit"
+                                            style="width:28px;height:28px;background:var(--panel);border:1px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:pointer;color:var(--white);@(item.Quantity <= 1 ? "opacity:0.3;pointer-events:none;" : "")">
+                                        −
+                                    </button>
+                                </form>
+                                <span style="font-weight:700;min-width:24px;text-align:center;">@item.Quantity</span>
+                                <!-- Increase -->
+                                <form asp-controller="Cart" asp-action="Update" method="post" style="display:inline;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="productID" value="@item.ProductID">
+                                    <input type="hidden" name="quantity" value="@(item.Quantity + 1)">
+                                    <button type="submit"
+                                            style="width:28px;height:28px;background:var(--panel);border:1px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:pointer;color:var(--white);">
+                                        +
+                                    </button>
+                                </form>
+                                <!-- Remove -->
+                                <form asp-controller="Cart" asp-action="Remove" method="post" style="display:inline;margin-left:4px;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="productID" value="@item.ProductID">
+                                    <button type="submit" class="cart-del">🗑 Xóa</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+
+        @if (Model != null && Model.Any())
+        {
+            <div style="padding:12px 20px;">
+                <a href="~/Product" class="btn-outline" style="display:inline-block;text-decoration:none;">
+                    ← Tiếp tục mua sắm
+                </a>
+                <form asp-controller="Cart" asp-action="Clear" method="post" style="display:inline;margin-left:8px;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="cart-del" onclick="return confirm('Xóa toàn bộ giỏ hàng?')">
+                        🗑 Xóa tất cả
+                    </button>
+                </form>
+            </div>
+        }
+    </div>
+
+    <!-- SUMMARY -->
+    <div>
+        <div class="cart-summary">
+            <div class="summary-title">Tóm tắt đơn hàng</div>
+            <div class="coupon-row">
+                <input type="text" placeholder="Nhập mã giảm giá...">
+                <button class="coupon-btn">Áp dụng</button>
+            </div>
+            <div class="summary-row">
+                <span>Tạm tính (@(Model?.Sum(m => m.Quantity) ?? 0) sản phẩm)</span>
+                <span>@((Model?.Sum(m => m.TotalAmount) ?? 0).ToString("N0"))đ</span>
+            </div>
+            <div class="summary-row">
+                <span>Phí vận chuyển</span>
+                <span style="color:var(--success);">Miễn phí</span>
+            </div>
+            <div class="summary-row total">
+                <span>Tổng cộng</span>
+                <span class="sum-amount">@((Model?.Sum(m => m.TotalAmount) ?? 0).ToString("N0"))đ</span>
+            </div>
+
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <a href="~/Order/Checkout" class="checkout-btn">
+                    🛍️ Tiến hành đặt hàng
+                </a>
+            }
+            else
+            {
+                <a href="~/Account/Login?returnUrl=/Order/Checkout"
+                   class="checkout-btn">
+                    🔐 Đăng nhập để đặt hàng
+                </a>
+            }
+            <a href="~/Product" class="btn-outline">
+                Tiếp tục mua sắm
+            </a>
+        </div>
+    </div>
+</div>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="empty-state" style="padding:60px 24px;text-align:center;">
+        <div style="font-size:4rem;margin-bottom:16px;opacity:.5;">🛒</div>
+        <div style="font-family:var(--font-head);font-size:1.4rem;font-weight:900;margin-bottom:8px;">Giỏ hàng trống</div>
+        <div style="font-size:.84rem;color:var(--grey);margin-bottom:24px;">Hãy thêm sản phẩm vào giỏ hàng của bạn</div>
+        <a href="~/Product" class="empty-btn">🛍️ Mua sắm ngay</a>
+    </div>
+}

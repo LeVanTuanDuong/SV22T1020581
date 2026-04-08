@@ -1,0 +1,15 @@
+@model IEnumerable<SV22T1020581.Models.Catalog.Category>
+
+<li><a class="dropdown-item" href="~/Product"><i class="bi bi-grid-3x3-gap me-2"></i>Tất cả sản phẩm</a></li>
+<li><hr class="dropdown-divider"></li>
+@if (Model != null)
+{
+    @foreach (var item in Model)
+    {
+        <li>
+            <a class="dropdown-item" href="~/Product?categoryID=@item.CategoryID">
+                <i class="bi bi-folder2-open me-2"></i>@item.CategoryName
+            </a>
+        </li>
+    }
+}

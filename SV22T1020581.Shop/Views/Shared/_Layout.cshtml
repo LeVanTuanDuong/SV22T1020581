@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"] — TechZone</title>
+    <meta name="description" content="TechZone – Nền tảng mua sắm điện tử & dụng cụ hàng đầu Việt Nam. Chất lượng – Giá tốt – Giao nhanh.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="~/css/site.css">
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">⚡ FLASH SALE – Giảm đến <strong>50%</strong> hôm nay | Miễn phí vận chuyển đơn từ <strong>500K</strong> | Hotline: <strong>1900 1234</strong></div>
+
+<!-- HEADER -->
+<header>
+    <div class="header-inner">
+        <a class="logo" href="~/">Tech<span>Zone</span></a>
+
+        <div class="search-bar">
+            <form action="~/Product" method="get">
+                <input type="text" name="searchValue" placeholder="Tìm sản phẩm, thương hiệu..."
+                       value="@ViewBag.SearchValue" autocomplete="off">
+                <button type="submit" class="search-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16">
+                        <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+                    </svg>
+                </button>
+            </form>
+        </div>
+
+        <div class="header-actions">
+            <a class="icon-btn" href="~/Cart">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <path d="M16 10a4 4 0 0 1-8 0"/>
+                </svg>
+                Giỏ hàng
+                <span class="badge" id="cartBadge">0</span>
+            </a>
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                var ud = (User as ClaimsPrincipal)?.GetUserData();
+                var headerName = !string.IsNullOrWhiteSpace(ud?.DisplayName)
+                    ? ud!.DisplayName
+                    : (!string.IsNullOrWhiteSpace(ud?.UserName) ? ud.UserName : User.Identity?.Name ?? "Tài khoản");
+                <div class="dropdown user-menu-dropdown">
+                    <button type="button" class="icon-btn user-menu-toggle dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="true" aria-expanded="false" aria-haspopup="true" id="userMenuToggle">
+                        <span class="user-menu-label">@headerName</span>
+                        <svg class="user-menu-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" aria-hidden="true">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end user-menu-panel" aria-labelledby="userMenuToggle">
+                        <li><a class="dropdown-item" href="~/Account/Profile">Thông tin</a></li>
+                        <li><a class="dropdown-item" href="~/Order/MyOrders">Đơn hàng</a></li>
+                        <li><a class="dropdown-item" href="~/Order/PurchaseHistory">Lịch sử mua hàng</a></li>
+                        <li><hr class="dropdown-divider user-menu-divider"></li>
+                        <li><a class="dropdown-item user-menu-logout" href="~/Account/Logout">Đăng xuất</a></li>
+                    </ul>
+                </div>
+            }
+            else
+            {
+                <a class="icon-btn" href="~/Account/Login">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    Đăng nhập
+                </a>
+            }
+        </div>
+    </div>
+</header>
+
+<!-- NAV CATEGORY BAR -->
+<div class="nav-bar">
+    <div class="nav-inner">
+        <a class="nav-link @(ViewBag.ActiveCategory == null ? "active" : "")" href="~/Product">Tất cả</a>
+        @if (ViewBag.Categories != null)
+        {
+            @foreach (var cat in ViewBag.Categories)
+            {
+                <a class="nav-link @((int?)ViewBag.ActiveCategory == cat.CategoryID ? "active" : "")"
+                   href="~/Product?categoryID=@cat.CategoryID">
+                    @(cat.CategoryName)
+                </a>
+            }
+        }
+    </div>
+</div>
+
+<!-- ALERTS -->
+@if (TempData["SuccessMessage"] is string successMsg && !string.IsNullOrWhiteSpace(successMsg))
+{
+    <div class="alert alert-success" role="alert" data-auto-dismiss>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
+        @successMsg
+    </div>
+}
+@if (TempData["ErrorMessage"] is string errMsg && !string.IsNullOrWhiteSpace(errMsg))
+{
+    <div class="alert alert-error" role="alert" data-auto-dismiss>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        @errMsg
+    </div>
+}
+@if (TempData["InfoMessage"] is string infoMsg && !string.IsNullOrWhiteSpace(infoMsg))
+{
+    <div class="alert alert-info" role="alert" data-auto-dismiss>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        @infoMsg
+    </div>
+}
+
+<!-- MAIN CONTENT -->
+<main class="page-content">
+    @RenderBody()
+</main>
+
+<!-- FOOTER -->
+<footer>
+    <div class="footer-inner">
+        <div class="footer-brand">
+            <a class="logo" href="~/">Tech<span>Zone</span></a>
+            <p>Nền tảng mua sắm điện tử & dụng cụ uy tín hàng đầu Việt Nam. Chất lượng – Giá tốt – Giao hàng nhanh.</p>
+        </div>
+        <div>
+            <h4>Hỗ trợ</h4>
+            <ul>
+                <li><a href="#">Trung tâm trợ giúp</a></li>
+                <li><a href="#">Theo dõi đơn hàng</a></li>
+                <li><a href="#">Chính sách đổi trả</a></li>
+                <li><a href="#">Bảo hành sản phẩm</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4>Về TechZone</h4>
+            <ul>
+                <li><a href="#">Giới thiệu</a></li>
+                <li><a href="#">Tuyển dụng</a></li>
+                <li><a href="#">Tin tức công nghệ</a></li>
+                <li><a href="#">Liên hệ</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4>Liên hệ</h4>
+            <ul>
+                <li><a href="tel:19001234">📞 1900 1234</a></li>
+                <li><a href="mailto:support@techzone.vn">✉️ support@techzone.vn</a></li>
+                <li><a href="#">📍 Hà Nội · TP.HCM · Đà Nẵng</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>© @DateTime.Now.Year TechZone. Bảo lưu mọi quyền.</p>
+        <p>Điều khoản · Bảo mật · Cookies</p>
+    </div>
+</footer>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

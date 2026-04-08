@@ -1,0 +1,169 @@
+@model SV22T1020581.Shop.Controllers.RegisterViewModel
+@{
+    ViewBag.Title = "Đăng ký — TechZone";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký — TechZone</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css">
+    <style>
+        :root {
+            --blue: #1a6ef5; --blue-bright: #3d8bff; --blue-glow: #1a6ef540;
+            --black: #08090d; --dark: #111318; --panel: #161b27; --border: #1f2d45;
+            --white: #f0f4ff; --grey: #8892a4; --sale: #ff3b5c; --success: #00c47c;
+            --font-head: 'Barlow Condensed', sans-serif; --font-body: 'Nunito', sans-serif;
+        }
+        body { background: var(--black); display: flex; align-items: flex-start; justify-content: center; min-height: 100vh; margin: 0; padding: 20px 16px 32px; box-sizing: border-box; }
+        .reg-wrap { width: 100%; max-width: 820px; padding: 12px; }
+        .reg-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px 36px 32px;
+            box-shadow: 0 0 60px rgba(26,110,245,.2);
+        }
+        .reg-logo { text-align: center; margin-bottom: 16px; }
+        .reg-logo a { font-family: var(--font-head); font-size: 2rem; font-weight: 900; color: var(--white); text-decoration: none; letter-spacing: -1px; }
+        .reg-logo span { color: #00d4ff; }
+        .reg-title { font-family: var(--font-head); font-size: 1.75rem; font-weight: 900; color: var(--blue-bright); text-align: center; margin-bottom: 6px; }
+        .reg-sub { font-size: .84rem; color: var(--grey); text-align: center; margin-bottom: 18px; }
+        .reg-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px 22px;
+            align-items: start;
+        }
+        @@media (max-width: 640px) {
+            .reg-grid { grid-template-columns: 1fr; gap: 12px; }
+            .reg-card { padding: 24px 20px; }
+            .reg-wrap { max-width: 100%; }
+        }
+        .field-group { margin-bottom: 0; min-width: 0; }
+        .field-group label { display: block; font-size: .78rem; font-weight: 600; color: var(--grey); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 6px; }
+        .field-group input {
+            width: 100%;
+            padding: 11px 14px;
+            background: var(--dark);
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            color: var(--white);
+            font-family: var(--font-body);
+            font-size: .88rem;
+            outline: none;
+            transition: .2s;
+            box-sizing: border-box;
+        }
+        .field-group input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-glow); }
+        .field-group input::placeholder { color: var(--grey); }
+        .field-validation-error, .text-danger { font-size: .75rem; color: var(--sale); display: block; margin-top: 4px; }
+        .validation-summary-errors { list-style: none; padding: 0; margin: 0; font-size: .8rem; color: var(--sale); }
+        .validation-summary-errors.reg-span-full:not(:empty) { margin-bottom: 6px; }
+        .reg-span-full { grid-column: 1 / -1; }
+        .reg-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--blue);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-family: var(--font-head);
+            font-size: 1.05rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-top: 4px;
+            transition: .2s;
+        }
+        .reg-btn:hover { background: var(--blue-bright); box-shadow: 0 4px 24px var(--blue-glow); }
+        .reg-footer { text-align: center; font-size: .82rem; color: var(--grey); margin-top: 18px; }
+        .reg-footer a { color: var(--blue-bright); font-weight: 600; text-decoration: none; }
+        .reg-footer a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div class="reg-wrap">
+    <div class="reg-card">
+        <div class="reg-logo">
+            <a href="~/">Tech<span>Zone</span></a>
+        </div>
+        <div class="reg-title">Tạo tài khoản</div>
+        <div class="reg-sub">Điền thông tin để mua sắm và theo dõi đơn hàng.</div>
+
+        <form asp-action="Register" asp-controller="Account" method="post">
+            @Html.AntiForgeryToken()
+            <div class="reg-grid">
+                <div asp-validation-summary="ModelOnly" class="validation-summary-errors reg-span-full"></div>
+
+                <div class="field-group">
+                    <label asp-for="CustomerName"></label>
+                    <input asp-for="CustomerName" placeholder="Họ và tên" autocomplete="name" />
+                    <span asp-validation-for="CustomerName"></span>
+                </div>
+
+                <div class="field-group">
+                    <label asp-for="ContactName"></label>
+                    <input asp-for="ContactName" placeholder="Tùy chọn — mặc định dùng họ tên" />
+                    <span asp-validation-for="ContactName"></span>
+                </div>
+
+                <div class="field-group">
+                    <label asp-for="Email"></label>
+                    <input asp-for="Email" placeholder="email@example.com" autocomplete="email" />
+                    <span asp-validation-for="Email"></span>
+                </div>
+
+                <div class="field-group">
+                    <label asp-for="Phone"></label>
+                    <input asp-for="Phone" placeholder="Số điện thoại (tùy chọn)" autocomplete="tel" />
+                    <span asp-validation-for="Phone"></span>
+                </div>
+
+                <div class="field-group">
+                    <label asp-for="Province"></label>
+                    <input asp-for="Province" placeholder="Tỉnh/Thành phố" />
+                    <span asp-validation-for="Province"></span>
+                </div>
+
+                <div class="field-group">
+                    <label asp-for="Address"></label>
+                    <input asp-for="Address" placeholder="Địa chỉ chi tiết" />
+                    <span asp-validation-for="Address"></span>
+                </div>
+
+                <div class="field-group">
+                    <label asp-for="Password"></label>
+                    <input asp-for="Password" placeholder="Tối thiểu 4 ký tự" autocomplete="new-password" />
+                    <span asp-validation-for="Password"></span>
+                </div>
+
+                <div class="field-group">
+                    <label asp-for="ConfirmPassword"></label>
+                    <input asp-for="ConfirmPassword" placeholder="Nhập lại mật khẩu" autocomplete="new-password" />
+                    <span asp-validation-for="ConfirmPassword"></span>
+                </div>
+
+                <button type="submit" class="reg-btn reg-span-full">Đăng ký</button>
+            </div>
+        </form>
+
+        <div class="reg-footer">
+            Đã có tài khoản?
+            <a href="~/Account/Login">Đăng nhập</a>
+        </div>
+    </div>
+</div>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+<script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>

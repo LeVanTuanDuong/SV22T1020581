@@ -1,0 +1,90 @@
+﻿<style>
+    .field-error {
+        border-color: #dc3545 !important;
+        background-color: #fff8f8 !important;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.15);
+    }
+    .field-error-message {
+        color: #dc3545;
+        font-size: 0.85rem;
+        margin-top: 4px;
+        display: none;
+    }
+    .field-error-message.show {
+        display: block;
+    }
+</style>
+
+<div class="card card-primary card-outline shadow-sm">
+    <div class="card-header">
+        <h3 class="card-title fw-bold text-primary">Thiết lập loại hàng</h3>
+    </div>
+    <form id="formCategory" action="~/Category/Save" method="post" novalidate>
+        <input type="hidden" name="CategoryID" value="0" />
+        <div class="card-body">
+            <div class="mb-3">
+                <label class="form-label fw-bold">Tên loại hàng:</label>
+                <input type="text"
+                       class="form-control"
+                       name="CategoryName"
+                       id="CategoryName"
+                       placeholder="VD: Ống kính Sony" />
+                <div class="field-error-message" id="CategoryName-error">Vui lòng nhập Tên loại hàng</div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Mô tả:</label>
+                <textarea class="form-control"
+                          name="Description"
+                          id="Description"
+                          rows="3"
+                          placeholder="Nhập mô tả loại hàng"></textarea>
+                <div class="field-error-message" id="Description-error">Vui lòng nhập Mô tả loại hàng</div>
+            </div>
+        </div>
+        <div class="card-footer text-end">
+            <button type="submit" class="btn btn-primary">Lưu dữ liệu</button>
+            <a href="~/Category" class="btn btn-secondary border">Quay lại</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.getElementById('formCategory').addEventListener('submit', function (e) {
+        var isValid = true;
+        var fields = [
+            { id: 'CategoryName', errorId: 'CategoryName-error' },
+            { id: 'Description', errorId: 'Description-error' }
+        ];
+
+        fields.forEach(function (field) {
+            var input = document.getElementById(field.id);
+            var errorMsg = document.getElementById(field.errorId);
+            if (!input || !errorMsg) return;
+
+            input.classList.remove('field-error');
+            errorMsg.classList.remove('show');
+
+            var value = input.value.trim();
+            if (value === '') {
+                input.classList.add('field-error');
+                errorMsg.classList.add('show');
+                isValid = false;
+            }
+        });
+
+        if (!isValid) {
+            e.preventDefault();
+        }
+    });
+
+    ['CategoryName', 'Description'].forEach(function (id) {
+        var input = document.getElementById(id);
+        if (!input) return;
+        input.addEventListener('input', function () {
+            input.classList.remove('field-error');
+            var errorMsg = document.getElementById(id + '-error');
+            if (errorMsg) errorMsg.classList.remove('show');
+        });
+    });
+</script>

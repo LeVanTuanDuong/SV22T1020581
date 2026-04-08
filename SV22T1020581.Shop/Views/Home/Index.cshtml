@@ -1,0 +1,150 @@
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "TechZone — Điện tử & Dụng cụ";
+}
+@model IEnumerable<SV22T1020581.Models.Catalog.Product>
+
+<!-- HERO SECTION -->
+<section class="hero" style="max-width:1280px;margin:20px auto;padding:40px 44px;">
+    <div class="hero-content">
+        <div class="hero-badge">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            Flash Sale — Chỉ hôm nay
+        </div>
+        <h1>Công nghệ<br><span>Không giới hạn</span></h1>
+        <p>Bộ sưu tập thiết bị điện tử & dụng cụ cao cấp giá ưu đãi nhất năm. Chỉ có tại TechZone!</p>
+        <div class="hero-countdown">
+            <div class="cd-box"><div class="num" id="cH">08</div><div class="lbl">Giờ</div></div>
+            <div class="cd-sep">:</div>
+            <div class="cd-box"><div class="num" id="cM">34</div><div class="lbl">Phút</div></div>
+            <div class="cd-sep">:</div>
+            <div class="cd-box"><div class="num" id="cS">52</div><div class="lbl">Giây</div></div>
+        </div>
+        <a href="~/Product" class="hero-cta">🛒 Mua ngay – Giảm 50%</a>
+    </div>
+    <div class="hero-icon">⚡</div>
+</section>
+
+<!-- PROMO BANNERS -->
+<div style="max-width:1280px;margin:0 auto;padding:0 24px 8px;">
+    <div class="promo-grid">
+        <div class="promo-card">
+            <div class="promo-icon">🚚</div>
+            <div>
+                <div class="promo-title">Miễn phí vận chuyển</div>
+                <div class="promo-desc">Đơn hàng từ 500.000đ</div>
+            </div>
+        </div>
+        <div class="promo-card">
+            <div class="promo-icon">🔄</div>
+            <div>
+                <div class="promo-title">Đổi trả dễ dàng</div>
+                <div class="promo-desc">30 ngày hoàn trả miễn phí</div>
+            </div>
+        </div>
+        <div class="promo-card">
+            <div class="promo-icon">🔒</div>
+            <div>
+                <div class="promo-title">Thanh toán an toàn</div>
+                <div class="promo-desc">Đa dạng phương thức</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FEATURED PRODUCTS -->
+@if (Model != null && Model.Any())
+{
+    <div style="max-width:1280px;margin:0 auto;padding:16px 24px 24px;">
+        <div class="section-head">
+            <h2>🔥 Sản phẩm <span>nổi bật</span></h2>
+            <a class="see-all" href="~/Product">Xem tất cả →</a>
+        </div>
+        <div class="product-grid">
+            @foreach (var p in Model.Take(8))
+            {
+                var catName = (ViewBag.Categories as IEnumerable<SV22T1020581.Models.Catalog.Category>)
+                    ?.FirstOrDefault(c => c.CategoryID == p.CategoryID)?.CategoryName ?? "";
+                <div class="product-card" onclick="window.location.href='/Product/Detail/@p.ProductID'">
+                    <div class="product-img">
+                        @if (!string.IsNullOrWhiteSpace(p.Photo))
+                        {
+                            <img src="~/images/products/@p.Photo" alt="@p.ProductName" loading="lazy">
+                        }
+                        else
+                        {
+                            <img src="~/images/placeholder-product.png" alt="" loading="lazy" class="product-placeholder-img">
+                        }
+                    </div>
+                    <div class="product-info">
+                        <div class="product-name">@p.ProductName</div>
+                        <div class="product-stars">★★★★★ <span>(248)</span></div>
+                        <div class="price-row">
+                            <span class="price-now">@p.Price.ToString("N0")đ</span>
+                        </div>
+                    </div>
+                    <div class="product-actions">
+                        <button class="btn-cart" onclick="event.stopPropagation(); addToCart(@p.ProductID, 1)">
+                            + Giỏ hàng
+                        </button>
+                        <button class="btn-wish" onclick="event.stopPropagation(); toast('❤️ Đã thêm vào yêu thích')">♡</button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+<!-- WHY TECHZONE -->
+<div style="max-width:1280px;margin:0 auto;padding:0 24px 32px;">
+    <div class="section-head">
+        <h2>⚡ Tại sao chọn <span>TechZone</span>?</h2>
+    </div>
+    <div class="promo-grid">
+        <div class="promo-card">
+            <div class="promo-icon">✅</div>
+            <div>
+                <div class="promo-title">Hàng chính hãng 100%</div>
+                <div class="promo-desc">Cam kết sản phẩm chính hãng</div>
+            </div>
+        </div>
+        <div class="promo-card">
+            <div class="promo-icon">🚚</div>
+            <div>
+                <div class="promo-title">Giao hàng nhanh 2-3 ngày</div>
+                <div class="promo-desc">Hỗ trợ giao hàng toàn quốc</div>
+            </div>
+        </div>
+        <div class="promo-card">
+            <div class="promo-icon">🔄</div>
+            <div>
+                <div class="promo-title">Đổi trả 30 ngày</div>
+                <div class="promo-desc">Không hài lòng? Đổi trả miễn phí</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+// ── Countdown Timer ────────────────────────────────────────────
+function startCountdown() {
+    let t = 8 * 3600 + 34 * 60 + 52;
+    setInterval(() => {
+        t--;
+        if (t < 0) t = 86400;
+        const h = Math.floor(t / 3600);
+        const m = Math.floor((t % 3600) / 60);
+        const s = t % 60;
+        const pad = n => String(n).padStart(2, '0');
+        const elH = document.getElementById('cH');
+        const elM = document.getElementById('cM');
+        const elS = document.getElementById('cS');
+        if (elH) elH.textContent = pad(h);
+        if (elM) elM.textContent = pad(m);
+        if (elS) elS.textContent = pad(s);
+    }, 1000);
+}
+startCountdown();
+</script>
+}

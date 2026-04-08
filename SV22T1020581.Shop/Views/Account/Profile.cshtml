@@ -1,0 +1,61 @@
+@model SV22T1020581.Models.Partner.Customer?
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Thông tin tài khoản — TechZone";
+    var ud = (User as ClaimsPrincipal)?.GetUserData();
+    var sidebarName = !string.IsNullOrWhiteSpace(ud?.DisplayName)
+        ? ud!.DisplayName
+        : (!string.IsNullOrWhiteSpace(ud?.UserName) ? ud.UserName : User.Identity?.Name ?? "Khách hàng");
+    var sidebarEmail = !string.IsNullOrWhiteSpace(ud?.Email) ? ud!.Email : (Model?.Email ?? "");
+}
+
+<div class="profile-layout">
+    <div class="profile-sidebar">
+        <div class="profile-avatar">
+            @(sidebarName.Length > 0 ? sidebarName[0].ToString().ToUpper() : "?")
+        </div>
+        <div class="profile-name">@sidebarName</div>
+        <div class="profile-email">@sidebarEmail</div>
+        <ul class="profile-menu">
+            <li class="active">👤 Thông tin cá nhân</li>
+            <li onclick="window.location.href='/Account/EditProfile'" style="cursor:pointer;">✏️ Thay đổi thông tin</li>
+            <li onclick="window.location.href='/Account/ChangePassword'" style="cursor:pointer;">🔑 Đổi mật khẩu</li>
+            <li onclick="window.location.href='/Order/MyOrders'" style="cursor:pointer;">📋 Đơn hàng (theo trạng thái)</li>
+            <li onclick="window.location.href='/Order/PurchaseHistory'" style="cursor:pointer;">🕐 Lịch sử mua hàng</li>
+            <li class="danger" onclick="window.location.href='/Account/Logout'" style="cursor:pointer;">🚪 Đăng xuất</li>
+        </ul>
+    </div>
+
+    <div class="profile-content">
+        <div class="section-title-profile">👤 Thông tin cá nhân</div>
+
+        @if (Model == null)
+        {
+            <p style="color:var(--grey);">Không tải được thông tin khách hàng.</p>
+        }
+        else
+        {
+            <dl class="profile-info-list">
+                <dt>Họ và tên</dt>
+                <dd>@Model.CustomerName</dd>
+                <dt>Tên giao dịch</dt>
+                <dd>@(string.IsNullOrWhiteSpace(Model.ContactName) ? "—" : Model.ContactName)</dd>
+                <dt>Email</dt>
+                <dd>@Model.Email</dd>
+                <dt>Điện thoại</dt>
+                <dd>@(string.IsNullOrWhiteSpace(Model.Phone) ? "—" : Model.Phone)</dd>
+                <dt>Tỉnh / Thành phố</dt>
+                <dd>@(string.IsNullOrWhiteSpace(Model.Province) ? "—" : Model.Province)</dd>
+                <dt>Địa chỉ</dt>
+                <dd>@(string.IsNullOrWhiteSpace(Model.Address) ? "—" : Model.Address)</dd>
+            </dl>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px;">
+                <a href="~/Account/EditProfile" class="save-btn" style="display:inline-flex;text-decoration:none;">Thay đổi thông tin</a>
+                <a href="~/Account/ChangePassword"
+                   style="display:inline-flex;align-items:center;padding:12px 20px;border:1.5px solid var(--border);border-radius:var(--radius-sm);text-decoration:none;font-size:.84rem;color:var(--grey);transition:var(--transition);">
+                    Đổi mật khẩu
+                </a>
+            </div>
+        }
+    </div>
+</div>

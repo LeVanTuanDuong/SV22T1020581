@@ -1,0 +1,337 @@
+@using System.Globalization
+@using SV22T1020581.Models.Catalog
+@using SV22T1020581.Models.Common
+@using SV22T1020581.Models.DataDictionary
+@using SV22T1020581.Models.Partner
+@using SV22T1020581.Models.Sales
+@{
+    ViewBag.Title = "Lập đơn hàng";
+    var products = ViewBag.Products as PagedResult<Product> ?? new PagedResult<Product>();
+    var customers = ViewBag.Customers as List<Customer> ?? new List<Customer>();
+    var provinces = ViewBag.Provinces as IReadOnlyList<Province> ?? Array.Empty<Province>();
+    var search = ViewBag.ProductSearch as string ?? "";
+    var cart = ViewBag.Cart as List<OrderDetailViewInfo> ?? new List<OrderDetailViewInfo>();
+    var cartTotal = cart.Sum(x => x.Quantity * x.SalePrice);
+    var currentEmployeeName = ViewBag.CurrentEmployeeName as string ?? "Nhân viên";
+}
+
+<div class="row">
+    <!-- Tìm kiếm & chọn mặt hàng -->
+    <div class="col-4">
+        <div class="card card-outline card-primary h-100">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-search"></i>
+                    Lựa chọn hàng cần bán
+                </h5>
+            </div>
+
+            <div class="card-body">
+                <form method="get" asp-action="Create" class="mb-3">
+                    <div class="input-group">
+                        <input class="form-control"
+                               name="searchValue"
+                               value="@search"
+                               placeholder="Nhập tên mặt hàng cần tìm" autofocus />
+                        <input type="hidden" name="page" value="1" />
+                        <button class="btn btn-primary" type="submit">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <div class="small text-muted mb-2">
+                    Có <strong>@products.RowCount</strong> mặt hàng phù hợp (trang @products.Page / @(products.PageCount == 0 ? 1 : products.PageCount)).
+                </div>
+
+                @if (products.DataItems.Count == 0)
+                {
+                    <div class="alert alert-light border text-muted small mb-0">
+                        Không có mặt hàng nào. Thử tìm kiếm khác hoặc thêm mặt hàng trong <a href="~/Product">Quản lý mặt hàng</a>.
+                    </div>
+                }
+                else
+                {
+                    foreach (var item in products.DataItems)
+                    {
+                        var img = string.IsNullOrWhiteSpace(item.Photo) ? "nophoto.png" : item.Photo;
+                        <div class="border rounded p-2 mb-2">
+                            <strong>@item.ProductName</strong>
+                            @if (!item.IsSelling)
+                            {
+                                <span class="badge bg-secondary ms-1">Ngừng bán</span>
+                            }
+
+                            <div class="row mt-2">
+                                <div class="col-4">
+                                    <img src="~/images/products/@img"
+                                         class="img-fluid border" style="max-height:100px"
+                                         alt=""
+                                         onerror="this.src='@Url.Content("~/images/products/nophoto.png")'" />
+                                </div>
+                                <div class="col-8">
+                                    <div class="row g-2">
+                                        <div class="col-7">
+                                            <label class="form-label mb-0">Giá</label>
+                                            <input class="form-control form-control-sm bg-light"
+                                                   value="@item.Price.ToString("N0")"
+                                                   readonly />
+                                        </div>
+                                        <div class="col-5">
+                                            <label class="form-label mb-0">SL</label>
+                                            @if (item.IsSelling)
+                                            {
+                                                <form asp-controller="Order" asp-action="AddToCart" method="post" class="d-inline w-100" id="add-@item.ProductID">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="productId" value="@item.ProductID" />
+                                                    <input type="hidden" name="salePrice" value="@item.Price.ToString(CultureInfo.InvariantCulture)" />
+                                                    <input type="hidden" name="returnPage" value="@products.Page" />
+                                                    <input type="hidden" name="returnSearch" value="@search" />
+                                                    <input type="number"
+                                                           name="quantity"
+                                                           min="1"
+                                                           value="1"
+                                                           class="form-control form-control-sm" />
+                                                </form>
+                                            }
+                                            else
+                                            {
+                                                <input type="number" min="1" value="1" class="form-control form-control-sm bg-light" readonly title="Hàng ngừng bán" />
+                                            }
+                                        </div>
+                                    </div>
+
+                                    @if (item.IsSelling)
+                                    {
+                                        <button type="submit" form="add-@item.ProductID" class="btn btn-sm btn-primary mt-2 w-100">
+                                            <i class="bi bi-cart-plus"></i>
+                                            Thêm vào giỏ
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn btn-sm btn-secondary mt-2 w-100" disabled title="Mặt hàng đang ngừng bán">
+                                            <i class="bi bi-cart-plus"></i>
+                                            Thêm vào giỏ
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    @if (products.PageCount > 1)
+                    {
+                        var last = products.PageCount;
+                        var cur = products.Page;
+                        var windowStart = cur;
+                        var windowEnd = Math.Min(cur + 2, last);
+                        var showEllipsisBeforeLast = last > windowEnd + 1;
+                        <nav class="mt-2 pt-2 border-top" aria-label="Phân trang mặt hàng">
+                            <ul class="pagination pagination-sm justify-content-center flex-wrap mb-0">
+                                @if (products.HasPreviousPage)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link py-1 px-2" href="@Url.Action("Create", new { page = products.Page - 1, searchValue = search })" aria-label="Trang trước">
+                                            <i class="bi bi-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                }
+                                @for (var i = windowStart; i <= windowEnd; i++)
+                                {
+                                    <li class="page-item @(products.Page == i ? "active" : "")">
+                                        <a class="page-link py-1 px-2" href="@Url.Action("Create", new { page = i, searchValue = search })">@i</a>
+                                    </li>
+                                }
+                                @if (showEllipsisBeforeLast)
+                                {
+                                    <li class="page-item disabled"><span class="page-link py-1 px-2">…</span></li>
+                                    <li class="page-item @(products.Page == last ? "active" : "")">
+                                        <a class="page-link py-1 px-2" href="@Url.Action("Create", new { page = last, searchValue = search })">@last</a>
+                                    </li>
+                                }
+                                else if (windowEnd < last)
+                                {
+                                    <li class="page-item @(products.Page == last ? "active" : "")">
+                                        <a class="page-link py-1 px-2" href="@Url.Action("Create", new { page = last, searchValue = search })">@last</a>
+                                    </li>
+                                }
+                                @if (products.HasNextPage)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link py-1 px-2" href="@Url.Action("Create", new { page = products.Page + 1, searchValue = search })" aria-label="Trang sau">
+                                            <i class="bi bi-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </nav>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Giỏ hàng và thông tin khách hàng -->
+    <div class="col-8">
+        <div class="row">
+            <div class="col-12">
+                <div class="card card-outline card-success">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-cart"></i>
+                            Danh sách mặt hàng đã chọn
+                        </h5>
+                    </div>
+
+                    <div class="card-body">
+                        <table class="table table-bordered table-hover align-middle">
+                            <thead class="table-success">
+                                <tr>
+                                    <th class="text-center">#</th>
+                                    <th style="width:auto">Tên hàng</th>
+                                    <th class="text-center" style="width:100px">ĐVT</th>
+                                    <th class="text-center" style="width:100px">SL</th>
+                                    <th class="text-end" style="width:150px">Giá</th>
+                                    <th class="text-end" style="width:150px">Thành tiền</th>
+                                    <th style="width:80px"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (cart.Count == 0)
+                                {
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted py-4">
+                                            Chưa có mặt hàng trong giỏ.
+                                        </td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    var idx = 0;
+                                    foreach (var line in cart)
+                                    {
+                                        idx++;
+                                        var lineTotal = line.Quantity * line.SalePrice;
+                                        <tr>
+                                            <td class="text-center">@idx</td>
+                                            <td>@line.ProductName</td>
+                                            <td class="text-center">@line.Unit</td>
+                                            <td class="text-center">@line.Quantity</td>
+                                            <td class="text-end">@line.SalePrice.ToString("N0")</td>
+                                            <td class="text-end">@lineTotal.ToString("N0")</td>
+                                            <td class="text-center">
+                                                <form asp-controller="Order" asp-action="RemoveFromCart" method="post" class="d-inline">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="productId" value="@line.ProductID" />
+                                                    <input type="hidden" name="returnPage" value="@products.Page" />
+                                                    <input type="hidden" name="returnSearch" value="@search" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-1" title="Xóa dòng">
+                                                        <i class="bi bi-x-lg"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="5" class="text-end">Tổng cộng:</th>
+                                    <th class="text-end">@cartTotal.ToString("N0")</th>
+                                    <th></th>
+                                </tr>
+                            </tfoot>
+                        </table>
+
+                        <div class="text-end">
+                            <form asp-controller="Order" asp-action="ClearCart" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="returnPage" value="@products.Page" />
+                                <input type="hidden" name="returnSearch" value="@search" />
+                                <button type="submit" class="btn btn-sm btn-danger mt-2">
+                                    <i class="bi bi-trash"></i>
+                                    Xóa giỏ hàng
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <!-- Thông tin nhân viên đang đăng nhập -->
+            <div class="col-12">
+                <div class="alert alert-info d-flex align-items-center mb-3 py-2">
+                    <i class="bi bi-person-badge-fill me-2 fs-5"></i>
+                    <div>
+                        <strong>Nhân viên lập đơn:</strong> @currentEmployeeName
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="card card-outline card-info">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-person"></i>
+                            Thông tin khách hàng & nơi giao hàng
+                        </h5>
+                    </div>
+
+                    <div class="card-body">
+                        <form asp-controller="Order" asp-action="PlaceOrder" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="returnPage" value="@products.Page" />
+                            <input type="hidden" name="returnSearch" value="@search" />
+                            <div class="row mb-3">
+                                <label class="col-md-2 col-form-label">Khách hàng</label>
+                                <div class="col-md-10">
+                                    <select class="form-select" name="customerId" id="CustomerID">
+                                        <option value="">-- Chọn khách hàng --</option>
+                                        @foreach (var c in customers)
+                                        {
+                                            <option value="@c.CustomerID">@c.CustomerName — @c.ContactName (@c.Email)</option>
+                                        }
+                                    </select>
+                                    @if (customers.Count == 0)
+                                    {
+                                        <div class="form-text text-warning">Chưa có khách hàng trong CSDL. Thêm tại <a href="~/Customer">Quản lý khách hàng</a>.</div>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <label class="col-md-2 col-form-label">Tỉnh/thành</label>
+                                <div class="col-md-10">
+                                    <select class="form-select" name="deliveryProvince" id="DeliveryProvince">
+                                        <option value="">-- Chọn Tỉnh/thành giao hàng --</option>
+                                        @foreach (var p in provinces)
+                                        {
+                                            <option value="@p.ProvinceName">@p.ProvinceName</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <label class="col-md-2 col-form-label">Địa chỉ</label>
+                                <div class="col-md-10">
+                                    <textarea class="form-control" name="deliveryAddress" rows="2" placeholder="Địa chỉ giao hàng"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-circle"></i>
+                                    Lập đơn hàng
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

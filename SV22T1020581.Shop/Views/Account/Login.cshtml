@@ -1,0 +1,173 @@
+@{
+    ViewBag.Title = "Đăng nhập — TechZone";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập — TechZone</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css">
+    <style>
+        :root {
+            --blue: #1a6ef5; --blue-bright: #3d8bff; --blue-glow: #1a6ef540;
+            --black: #08090d; --dark: #111318; --panel: #161b27; --border: #1f2d45;
+            --white: #f0f4ff; --grey: #8892a4; --sale: #ff3b5c; --success: #00c47c;
+            --font-head: 'Barlow Condensed', sans-serif; --font-body: 'Nunito', sans-serif;
+        }
+        body { background: var(--black); display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+        .login-wrap { width: 100%; max-width: 420px; padding: 24px; }
+        .login-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 36px;
+            box-shadow: 0 0 60px rgba(26,110,245,.2);
+        }
+        .login-logo { text-align: center; margin-bottom: 28px; }
+        .login-logo a { font-family: var(--font-head); font-size: 2rem; font-weight: 900; color: var(--white); text-decoration: none; letter-spacing: -1px; }
+        .login-logo span { color: #00d4ff; }
+        .login-title { font-family: var(--font-head); font-size: 1.8rem; font-weight: 900; color: var(--blue-bright); text-align: center; margin-bottom: 6px; }
+        .login-sub { font-size: .84rem; color: var(--grey); text-align: center; margin-bottom: 24px; }
+        .field-group { margin-bottom: 16px; }
+        .field-group label { display: block; font-size: .78rem; font-weight: 600; color: var(--grey); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 6px; }
+        .field-input-wrap { position: relative; }
+        .field-input-wrap input {
+            width: 100%;
+            padding: 11px 44px 11px 14px;
+            background: var(--dark);
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            color: var(--white);
+            font-family: var(--font-body);
+            font-size: .88rem;
+            outline: none;
+            transition: .2s;
+            box-sizing: border-box;
+        }
+        .field-input-wrap input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-glow); }
+        .field-input-wrap input::placeholder { color: var(--grey); }
+        .field-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--grey);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+        }
+        .field-icon:hover { color: var(--blue-bright); }
+        .login-btn {
+            width: 100%;
+            padding: 13px;
+            background: var(--blue);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-family: var(--font-head);
+            font-size: 1.05rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: .2s;
+        }
+        .login-btn:hover { background: var(--blue-bright); box-shadow: 0 4px 24px var(--blue-glow); }
+        .login-divider { text-align: center; font-size: .82rem; color: var(--grey); margin: 16px 0; }
+        .login-footer { text-align: center; font-size: .82rem; color: var(--grey); margin-top: 18px; }
+        .login-footer a { color: var(--blue-bright); font-weight: 600; cursor: pointer; text-decoration: none; }
+        .login-footer a:hover { text-decoration: underline; }
+        .success-banner {
+            background: rgba(0,196,124,.12);
+            border: 1px solid rgba(0,196,124,.35);
+            color: var(--success);
+            font-size: .82rem;
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        .error-line { font-size: .78rem; color: var(--sale); margin-top: 6px; display: block; font-weight: 500; }
+        .forgot-link { display: block; text-align: right; font-size: .78rem; color: var(--grey); margin-top: 4px; text-decoration: none; }
+        .forgot-link:hover { color: var(--blue-bright); }
+    </style>
+</head>
+<body>
+
+<div class="login-wrap">
+    <div class="login-card">
+        <div class="login-logo">
+            <a href="~/">Tech<span>Zone</span></a>
+        </div>
+        <div class="login-title">Đăng nhập</div>
+        <div class="login-sub">Chào mừng trở lại TechZone!</div>
+
+        @if (TempData["SuccessMessage"] is string successMsg)
+        {
+            <div class="success-banner" role="status">@successMsg</div>
+        }
+
+        <form method="post" action="@Url.Action("Login", "Account")">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+
+            <div class="field-group">
+                <label for="email">Email</label>
+                <div class="field-input-wrap">
+                    <input type="email" name="username" id="email"
+                           placeholder="Nhập email đã đăng ký"
+                           value="@ViewBag.Username" autofocus>
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label for="password">Mật khẩu</label>
+                <div class="field-input-wrap">
+                    <input type="password" name="password" id="password"
+                           placeholder="Nhập mật khẩu"
+                           value="@ViewBag.Password">
+                    <button type="button" class="field-icon" onclick="togglePwd()" id="toggleBtn" aria-label="Hiện/ẩn mật khẩu">
+                        👁
+                    </button>
+                </div>
+                @if (ViewData.ModelState.TryGetValue("Error", out var errState) && errState.Errors.Count > 0)
+                {
+                    <span class="error-line">@errState.Errors[0].ErrorMessage</span>
+                }
+            </div>
+
+            <button type="submit" class="login-btn">ĐĂNG NHẬP</button>
+        </form>
+
+        <div class="login-footer">
+            Chưa có tài khoản?
+            <a href="~/Account/Register">Đăng ký ngay</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePwd() {
+        var pwd = document.getElementById('password');
+        var btn = document.getElementById('toggleBtn');
+        if (pwd.type === 'password') {
+            pwd.type = 'text';
+            btn.textContent = '🙈';
+        } else {
+            pwd.type = 'password';
+            btn.textContent = '👁';
+        }
+    }
+</script>
+</body>
+</html>

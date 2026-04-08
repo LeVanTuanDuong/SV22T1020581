@@ -1,0 +1,29 @@
+﻿@model int
+@{
+    Layout = null;
+}
+<form asp-action="FinishConfirm" asp-route-id="@Model" method="post">
+    @Html.AntiForgeryToken()
+    <div class="modal-header text-bg-success">
+        <strong class="modal-title">
+            Hoàn tất đơn hàng #@Model
+        </strong>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    </div>
+
+    <div class="modal-body">
+        <div class="alert alert-success d-flex align-items-center">
+            <i class="bi bi-info-circle me-2"></i>
+            Người giao hàng đã được gán ở bước <strong>Chuyển giao hàng</strong>. Xác nhận đơn đã giao xong?
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-success">
+            <i class="bi bi-check-all"></i> Hoàn tất
+        </button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            Đóng
+        </button>
+    </div>
+</form>

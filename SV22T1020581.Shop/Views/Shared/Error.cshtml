@@ -1,0 +1,36 @@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lỗi — TechZone</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css">
+    <style>
+        body { background: var(--black); display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+    </style>
+</head>
+<body>
+    <div class="denied-wrap">
+        <div class="denied-card">
+            <div class="denied-icon">⚠️</div>
+            <div class="denied-title">Đã xảy ra lỗi</div>
+            <div class="denied-sub">
+                Rất tiếc, đã có lỗi xảy ra trong quá trình xử lý yêu cầu của bạn.<br>
+                Vui lòng thử lại hoặc quay về trang chủ.
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+                <a href="~/"
+                   style="display:block;padding:13px;text-align:center;background:var(--blue);color:#fff;border:none;border-radius:8px;font-family:var(--font-head);font-size:1rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;text-decoration:none;">
+                    ← Quay về trang chủ
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

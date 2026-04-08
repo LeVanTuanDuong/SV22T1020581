@@ -1,0 +1,275 @@
+@model SV22T1020581.Admin.Models.OrderDetailPageModel
+@{
+    ViewBag.Title = "Chi tiết đơn hàng #" + Model.Order.OrderID;
+    var order = Model.Order;
+    var customer = Model.Customer;
+    var employee = Model.Employee;
+    var statusClass = order.Status switch
+    {
+        1 => "bg-warning text-dark",
+        2 => "bg-info",
+        3 => "bg-primary",
+        4 => "bg-success",
+        -1 => "bg-secondary",
+        -2 => "bg-danger",
+        _ => "bg-secondary"
+    };
+    var canProcess = order.Status is 1;
+    var canAssignShipper = order.Status is 2;
+    var canFinish = order.Status is 3;
+    var canDelete = order.Status is 1 or -1 or -2;
+    var orderTotal = Model.Details.Sum(x => x.TotalAmount);
+}
+
+@section PageToolBar {
+    @if (canProcess)
+    {
+        <div class="btn-group">
+            <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown">
+                <i class="bi bi-check-circle me-1"></i> Xử lý đơn
+            </button>
+            <ul class="dropdown-menu">
+                <li>
+                    <a href="~/Order/Accept/@order.OrderID" class="dropdown-item open-modal">
+                        <i class="bi bi-hand-thumbs-up text-success"></i> Duyệt đơn hàng
+                    </a>
+                </li>
+                <li>
+                    <form asp-action="Reject" asp-route-id="@order.OrderID" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="dropdown-item text-danger">
+                            <i class="bi bi-x-circle"></i> Từ chối đơn hàng
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    }
+    @if (canAssignShipper)
+    {
+        <a href="~/Order/Shipping/@order.OrderID" class="btn btn-primary btn-sm open-modal ms-1">
+            <i class="bi bi-truck me-1"></i> Chuyển giao hàng
+        </a>
+    }
+    @if (canFinish)
+    {
+        <a href="~/Order/Finish/@order.OrderID" class="btn btn-success btn-sm open-modal ms-1">
+            <i class="bi bi-check-all me-1"></i> Hoàn tất đơn hàng
+        </a>
+    }
+    @if (canDelete)
+    {
+        <a href="~/Order/Delete/@order.OrderID" class="btn btn-danger btn-sm open-modal ms-1">
+            <i class="bi bi-trash"></i> Xóa
+        </a>
+    }
+    @if (order.Status == 1)
+    {
+        <a href="~/Order/Cancel/@order.OrderID" class="btn btn-secondary btn-sm open-modal ms-1">
+            <i class="bi bi-x-lg"></i> Hủy đơn
+        </a>
+    }
+    <a href="~/Order" class="btn btn-secondary btn-sm ms-1">
+        <i class="bi bi-arrow-left"></i> Quay lại
+    </a>
+}
+
+<!-- TRẠNG THÁI ĐƠN HÀNG -->
+<div class="alert @statusClass d-flex align-items-center mb-3">
+    <i class="bi bi-info-circle-fill fs-5 me-2"></i>
+    <div>
+        <strong>Trạng thái:</strong> @SV22T1020581.Models.Sales.OrderStatusExtensions.GetDisplayLabel(order.Status)
+        @if (order.FinishedTime.HasValue)
+        {
+            <span>— Đã hoàn tất lúc <b>@order.FinishedTime.Value.ToString("dd/MM/yyyy HH:mm")</b></span>
+        }
+    </div>
+</div>
+
+<!-- THÔNG TIN ĐƠN HÀNG -->
+<div class="card card-primary card-outline mb-3">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-receipt me-2"></i>
+            Thông tin đơn hàng
+        </h5>
+    </div>
+    <div class="card-body ps-4 pe-4">
+        <div class="row mb-2">
+            <div class="col-md-3 fw-bold">Mã đơn hàng</div>
+            <div class="col-md-3">#@order.OrderID</div>
+            <div class="col-md-3 fw-bold">Ngày lập</div>
+            <div class="col-md-3">@order.OrderTime.ToString("dd/MM/yyyy HH:mm")</div>
+        </div>
+        <div class="row mb-2">
+            <div class="col-md-3 fw-bold">Nhân viên phụ trách</div>
+            <div class="col-md-9">
+                @if (employee != null)
+                {
+                    <div class="d-flex align-items-center">
+                        @if (!string.IsNullOrWhiteSpace(employee.Photo))
+                        {
+                            <img src="~/images/employees/@employee.Photo"
+                                 class="rounded-circle me-2"
+                                 style="width:36px;height:36px;object-fit:cover;"
+                                 alt=""
+                                 onerror="this.src='@Url.Content("~/images/employees/nophoto.png")'" />
+                        }
+                        else
+                        {
+                            <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center me-2"
+                                 style="width:36px;height:36px;">
+                                <i class="bi bi-person text-white"></i>
+                            </div>
+                        }
+                        <div>
+                            <strong>@(string.IsNullOrEmpty(employee.FullName) ? order.EmployeeName : employee.FullName)</strong>
+                            @if (!string.IsNullOrWhiteSpace(employee.Email))
+                            {
+                                <span class="text-muted ms-2">
+                                    <i class="bi bi-envelope me-1"></i>@employee.Email
+                                </span>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(employee.Phone))
+                            {
+                                <span class="text-muted ms-2">
+                                    <i class="bi bi-telephone me-1"></i>@employee.Phone
+                                </span>
+                            }
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    @(string.IsNullOrEmpty(order.EmployeeName) ? "—" : order.EmployeeName)
+                }
+            </div>
+        </div>
+        <div class="row mb-2">
+            <div class="col-md-3 fw-bold">Ngày duyệt</div>
+            <div class="col-md-3">@(order.AcceptTime?.ToString("dd/MM/yyyy HH:mm") ?? "—")</div>
+            <div class="col-md-3 fw-bold">Người giao hàng</div>
+            <div class="col-md-3">@(string.IsNullOrEmpty(order.ShipperName) ? "—" : order.ShipperName)</div>
+        </div>
+    </div>
+</div>
+
+<!-- THÔNG TIN KHÁCH HÀNG -->
+<div class="card card-info card-outline mb-3">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-person me-2"></i>
+            Thông tin khách hàng
+        </h5>
+    </div>
+    <div class="card-body ps-4 pe-4">
+        @if (customer != null)
+        {
+            <div class="row mb-2">
+                <div class="col-md-3 fw-bold">Khách hàng</div>
+                <div class="col-md-3">@(string.IsNullOrEmpty(customer.CustomerName) ? "—" : customer.CustomerName)</div>
+                <div class="col-md-3 fw-bold">Tên giao dịch</div>
+                <div class="col-md-3">@(string.IsNullOrEmpty(customer.ContactName) ? "—" : customer.ContactName)</div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-md-3 fw-bold">Email</div>
+                <div class="col-md-9">@(string.IsNullOrEmpty(customer.Email) ? "—" : customer.Email)</div>
+            </div>
+            <div class="row">
+                <div class="col-md-3 fw-bold">Điện thoại</div>
+                <div class="col-md-9">@(string.IsNullOrEmpty(customer.Phone) ? "—" : customer.Phone)</div>
+            </div>
+        }
+        else
+        {
+            <div class="text-muted">Không có thông tin khách hàng.</div>
+        }
+    </div>
+</div>
+
+<!-- THÔNG TIN GIAO HÀNG -->
+<div class="card card-success card-outline mb-3">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-truck me-2"></i>
+            Thông tin giao hàng
+        </h5>
+    </div>
+    <div class="card-body ps-4 pe-4">
+        <div class="row mb-2">
+            <div class="col-md-3 fw-bold">Người giao hàng</div>
+            <div class="col-md-3">@(string.IsNullOrEmpty(order.ShipperName) ? "—" : order.ShipperName)</div>
+            <div class="col-md-3 fw-bold">Điện thoại</div>
+            <div class="col-md-3">@(string.IsNullOrWhiteSpace(order.ShipperPhone) ? "—" : order.ShipperPhone)</div>
+        </div>
+        <div class="row mb-2">
+            <div class="col-md-3 fw-bold">Địa chỉ giao hàng</div>
+            <div class="col-md-9">@(string.IsNullOrEmpty(order.DeliveryAddress) ? "—" : order.DeliveryAddress)</div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 fw-bold">Tỉnh / Thành</div>
+            <div class="col-md-9">@(string.IsNullOrEmpty(order.DeliveryProvince) ? "—" : order.DeliveryProvince)</div>
+        </div>
+    </div>
+</div>
+
+<!-- DANH SÁCH MẶT HÀNG -->
+<div class="card card-secondary card-outline">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-box-seam me-2"></i>
+            Danh sách mặt hàng
+        </h5>
+    </div>
+    <div class="card-body table-responsive p-0">
+        <table class="table table-bordered table-hover align-middle mb-0">
+            <thead class="table-secondary text-center">
+                <tr>
+                    <th>STT</th>
+                    <th>Tên hàng</th>
+                    <th>ĐVT</th>
+                    <th>Số lượng</th>
+                    <th>Giá</th>
+                    <th>Thành tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    var i = 0;
+                    foreach (var item in Model.Details)
+                    {
+                        i++;
+                        <tr>
+                            <td class="text-center">@i</td>
+                            <td>@item.ProductName</td>
+                            <td class="text-center">@item.Unit</td>
+                            <td class="text-center">@item.Quantity</td>
+                            <td class="text-end">@item.SalePrice.ToString("N0")</td>
+                            <td class="text-end">@item.TotalAmount.ToString("N0")</td>
+                        </tr>
+                    }
+                    @if (i == 0)
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-3">Không có mặt hàng nào.</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th colspan="5" class="text-end">Tổng cộng</th>
+                    <th class="text-end">@orderTotal.ToString("N0")</th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .card-body .row {
+            border-bottom: 1px dotted #dee2e6;
+        }
+    </style>
+}

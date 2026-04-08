@@ -1,0 +1,160 @@
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = ViewBag.Title ?? "Danh mục sản phẩm — TechZone";
+}
+@model SV22T1020581.Models.Common.PagedResult<SV22T1020581.Models.Catalog.Product>
+
+<div style="max-width:1280px;margin:0 auto;padding:20px 24px;display:grid;grid-template-columns:230px 1fr;gap:22px;">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <!-- Categories -->
+        <div class="sidebar-card">
+            <h3>Danh mục</h3>
+            <ul class="cat-list">
+                <li>
+                    <a href="~/Product" class="@(ViewBag.ActiveCategory == null ? "active-cat" : "")">
+                        Tất cả
+                        <span class="cat-count">@Model?.RowCount</span>
+                    </a>
+                </li>
+                @if (ViewBag.Categories != null)
+                {
+                    @foreach (var cat in ViewBag.Categories)
+                    {
+                        <li>
+                            <a href="~/Product?categoryID=@cat.CategoryID"
+                               class="@((int?)ViewBag.ActiveCategory == cat.CategoryID ? "active-cat" : "")">
+                                @(cat.CategoryName)
+                            </a>
+                        </li>
+                    }
+                }
+            </ul>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main>
+        <!-- Filter Bar -->
+        <form method="get" action="~/Product" class="filter-bar">
+            <span class="filter-label">🔎 Lọc:</span>
+            <input type="text" name="searchValue" placeholder="Tên sản phẩm..."
+                   value="@ViewBag.SearchValue" style="flex:1;min-width:160px;">
+            <select name="categoryID" onchange="this.form.submit()">
+                <option value="">Tất cả danh mục</option>
+                @if (ViewBag.Categories != null)
+                {
+                    @foreach (var cat in ViewBag.Categories)
+                    {
+                        if ((int?)ViewBag.CategoryID == cat.CategoryID)
+                        {
+                            <option value="@cat.CategoryID" selected>@cat.CategoryName</option>
+                        }
+                        else
+                        {
+                            <option value="@cat.CategoryID">@cat.CategoryName</option>
+                        }
+                    }
+                }
+            </select>
+            <span class="filter-label">Giá:</span>
+            <input type="number" name="minPrice" placeholder="Từ" min="0"
+                   value="@(ViewBag.MinPrice > 0 ? ViewBag.MinPrice.ToString() : "")" style="width:110px;">
+            <span class="filter-label">—</span>
+            <input type="number" name="maxPrice" placeholder="Đến" min="0"
+                   value="@(ViewBag.MaxPrice > 0 ? ViewBag.MaxPrice.ToString() : "")" style="width:110px;">
+            <button type="submit" class="filter-btn">Tìm kiếm</button>
+            <a href="~/Product" class="btn-outline" style="padding:8px 14px;border:1.5px solid var(--border);border-radius:6px;font-size:.82rem;color:var(--grey);text-decoration:none;white-space:nowrap;">Reset</a>
+        </form>
+
+        <!-- Results header -->
+        @if (!string.IsNullOrWhiteSpace(ViewBag.SearchValue?.ToString()))
+        {
+            <p style="font-size:.82rem;color:var(--grey);margin-bottom:14px;">
+                Kết quả cho "<strong style="color:var(--white)">@ViewBag.SearchValue</strong>" — @(Model?.RowCount ?? 0) sản phẩm
+            </p>
+        }
+
+        <!-- Product Grid -->
+        @if (Model != null && Model.DataItems.Any())
+        {
+            <div class="product-grid">
+                @foreach (var p in Model.DataItems)
+                {
+                    <div class="product-card" onclick="window.location.href='/Product/Detail/@p.ProductID'">
+                        <div class="product-img">
+                            @if (!string.IsNullOrWhiteSpace(p.Photo))
+                            {
+                                <img src="~/images/products/@p.Photo" alt="@p.ProductName" loading="lazy">
+                            }
+                            else
+                            {
+                                <img src="~/images/placeholder-product.png" alt="" loading="lazy" class="product-placeholder-img">
+                            }
+                        </div>
+                        <div class="product-info">
+                            <div class="product-name">@p.ProductName</div>
+                            <div class="product-stars">★★★★★ <span>(248)</span></div>
+                            <div class="price-row">
+                                <span class="price-now">@p.Price.ToString("N0")đ</span>
+                            </div>
+                        </div>
+                        <div class="product-actions">
+                            <button class="btn-cart" onclick="event.stopPropagation(); addToCart(@p.ProductID, 1)">
+                                + Giỏ hàng
+                            </button>
+                            <button class="btn-wish" onclick="event.stopPropagation(); toast('❤️ Đã thêm vào yêu thích')">♡</button>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Pagination -->
+            @if (Model.PageCount > 1)
+            {
+                <div class="pagination-wrap">
+                    <ul class="pagination">
+                        @if (Model.Page > 1)
+                        {
+                            <li>
+                                <a href="~/Product?page=@(Model.Page - 1)&categoryID=@ViewBag.CategoryID&minPrice=@ViewBag.MinPrice&maxPrice=@ViewBag.MaxPrice&searchValue=@ViewBag.SearchValue">«</a>
+                            </li>
+                        }
+                        @foreach (var p in Model.GetDisplayPages())
+                        {
+                            if (p.IsEllipsis)
+                            {
+                                <li><span>...</span></li>
+                            }
+                            else
+                            {
+                                <li>
+                                    <a class="@(p.IsCurrent ? "active" : "")"
+                                       href="~/Product?page=@p.Page&categoryID=@ViewBag.CategoryID&minPrice=@ViewBag.MinPrice&maxPrice=@ViewBag.MaxPrice&searchValue=@ViewBag.SearchValue">
+                                        @p.Page
+                                    </a>
+                                </li>
+                            }
+                        }
+                        @if (Model.Page < Model.PageCount)
+                        {
+                            <li>
+                                <a href="~/Product?page=@(Model.Page + 1)&categoryID=@ViewBag.CategoryID&minPrice=@ViewBag.MinPrice&maxPrice=@ViewBag.MaxPrice&searchValue=@ViewBag.SearchValue">»</a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="empty-state">
+                <div class="empty-icon">🔍</div>
+                <div class="empty-title">Không tìm thấy sản phẩm nào</div>
+                <div class="empty-desc">Hãy thử thay đổi điều kiện lọc hoặc tìm kiếm khác</div>
+                <a href="~/Product" class="empty-btn">Xem tất cả sản phẩm</a>
+            </div>
+        }
+    </main>
+</div>

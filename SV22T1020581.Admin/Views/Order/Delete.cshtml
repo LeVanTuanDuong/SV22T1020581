@@ -1,0 +1,28 @@
+﻿@model int
+@{
+    Layout = null;
+}
+<div class="modal-header text-bg-danger">
+    <strong class="modal-title">
+        Xóa đơn hàng #@Model
+    </strong>
+    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+
+<form asp-action="DeleteConfirm" asp-route-id="@Model" method="post">
+    @Html.AntiForgeryToken()
+    <div class="modal-body">
+        <div class="alert alert-danger d-flex align-items-center">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            Bạn có chắc chắn muốn xóa đơn hàng <strong>#@Model</strong>? Hành động này không thể hoàn tác.
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-danger">
+            <i class="bi bi-trash"></i> Xóa
+        </button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            Đóng
+        </button>
+    </div>
+</form>

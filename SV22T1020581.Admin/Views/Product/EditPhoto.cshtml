@@ -1,0 +1,195 @@
+﻿@model SV22T1020581.Models.Catalog.ProductPhoto
+@{
+    ViewBag.Title = ViewBag.Title ?? "Bổ sung ảnh";
+    var pid = ViewBag.ProductID ?? Model.ProductID;
+    var currentPhoto = string.IsNullOrWhiteSpace(Model.Photo) ? "nophoto.png" : Model.Photo;
+}
+<style>
+    .field-error {
+        border-color: #dc3545 !important;
+        background-color: #fff8f8 !important;
+    }
+    .field-error-message {
+        color: #dc3545;
+        font-size: 0.85rem;
+        margin-top: 4px;
+        display: none;
+    }
+    .field-error-message.show {
+        display: block;
+    }
+</style>
+
+@section PageToolBar {
+    <button type="submit" form="formPhoto" class="btn btn-primary">
+        <i class="bi bi-save"></i>
+        Lưu ảnh
+    </button>
+    <a href="~/Product/Edit/@pid#photos" class="btn btn-secondary ms-1">
+        <i class="bi bi-arrow-left"></i>
+        Quay lại
+    </a>
+}
+
+<div class="row justify-content-center">
+    <div class="col-12">
+        <div class="card card-outline card-info">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-image me-2"></i>
+                    @ViewBag.Title
+                </h5>
+            </div>
+
+            <div class="card-body">
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger" role="alert">
+                        <ul class="mb-0 ps-3">
+                            @foreach (var entry in ViewData.ModelState.Values)
+                            {
+                                foreach (var err in entry.Errors)
+                                {
+                                    <li>@err.ErrorMessage</li>
+                                }
+                            }
+                        </ul>
+                    </div>
+                }
+
+                <form id="formPhoto"
+                      action="~/Product/SavePhoto"
+                      method="post"
+                      enctype="multipart/form-data"
+                      novalidate>
+
+                    <input type="hidden" name="PhotoID" value="@Model.PhotoID" />
+                    <input type="hidden" name="ProductID" value="@pid" />
+                    <input type="hidden" name="Photo" value="@Model.Photo" />
+
+                    <div class="row mb-3 align-items-center">
+                        <label class="col-sm-3 fw-semibold">Chọn ảnh</label>
+                        <div class="col-sm-9">
+                            <input type="file"
+                                   name="uploadPhoto"
+                                   id="uploadPhoto"
+                                   class="form-control"
+                                   accept="image/*"
+                                   onchange="previewNewImage(this)" />
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-3 fw-semibold">Xem trước</label>
+                        <div class="col-sm-9">
+                            <img id="imgPreview"
+                                 src="~/images/products/@currentPhoto"
+                                 class="img-thumbnail"
+                                 style="max-height:220px;"
+                                 alt="Xem trước ảnh"
+                                 onerror="this.src='@Url.Content("~/images/products/nophoto.png")'" />
+                            <div class="small text-muted mt-1">
+                                <i class="bi bi-info-circle"></i>
+                                @(Model.PhotoID > 0 ? "Nếu chọn ảnh mới, ảnh cũ sẽ bị thay thế." : "Chọn ảnh từ máy để xem trước.")
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-3 fw-semibold" for="Description">Mô tả ảnh</label>
+                        <div class="col-sm-9">
+                            <input type="text"
+                                   name="Description"
+                                   id="Description"
+                                   class="form-control"
+                                   value="@Model.Description"
+                                   placeholder="VD: Ảnh mặt trước sản phẩm" />
+                            <div class="field-error-message" id="Description-error">Vui lòng nhập Mô tả ảnh</div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-3 fw-semibold" for="DisplayOrder">Thứ tự hiển thị</label>
+                        <div class="col-sm-3">
+                            <input type="number"
+                                   name="DisplayOrder"
+                                   id="DisplayOrder"
+                                   class="form-control"
+                                   value="@(Model.DisplayOrder <= 0 ? 1 : Model.DisplayOrder)"
+                                   min="1" />
+                            <div class="field-error-message" id="DisplayOrder-error">Thứ tự phải lớn hơn 0</div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <label class="col-sm-3 fw-semibold">Trạng thái</label>
+                        <div class="col-sm-9">
+                            <div class="form-check">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       name="IsHidden"
+                                       id="IsHidden"
+                                       value="true"
+                                       checked="@(Model.IsHidden)" />
+                                <label class="form-check-label" for="IsHidden">
+                                    Ẩn ảnh với khách hàng
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Preview ảnh mới khi người dùng chọn file
+    function previewNewImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                document.getElementById('imgPreview').src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // Validation khi submit
+    document.getElementById('formPhoto').addEventListener('submit', function (e) {
+        var isValid = true;
+
+        var desc = document.getElementById('Description');
+        var order = document.getElementById('DisplayOrder');
+
+        desc.classList.remove('field-error');
+        order.classList.remove('field-error');
+        document.getElementById('Description-error').classList.remove('show');
+        document.getElementById('DisplayOrder-error').classList.remove('show');
+
+        if (!desc.value.trim()) {
+            desc.classList.add('field-error');
+            document.getElementById('Description-error').classList.add('show');
+            isValid = false;
+        }
+
+        var orderVal = parseInt(order.value);
+        if (isNaN(orderVal) || orderVal <= 0) {
+            order.classList.add('field-error');
+            document.getElementById('DisplayOrder-error').classList.add('show');
+            isValid = false;
+        }
+
+        if (!isValid) e.preventDefault();
+    });
+
+    ['Description', 'DisplayOrder'].forEach(function (id) {
+        var input = document.getElementById(id);
+        if (!input) return;
+        input.addEventListener('input', function () {
+            input.classList.remove('field-error');
+            var err = document.getElementById(id + '-error');
+            if (err) err.classList.remove('show');
+        });
+    });
+</script>

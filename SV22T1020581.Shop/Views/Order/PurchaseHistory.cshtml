@@ -1,0 +1,71 @@
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = ViewBag.Title ?? "Lịch sử mua hàng — TechZone";
+    var pagAction = ViewBag.OrdersListAction as string ?? "PurchaseHistory";
+}
+@model SV22T1020581.Models.Common.PagedResult<SV22T1020581.Models.Sales.OrderViewInfo>
+
+<div class="orders-container order-page--history">
+    <nav class="order-page-bc" aria-label="Breadcrumb">
+        <a href="~/">Trang chủ</a>
+        <span class="order-page-bc-sep">›</span>
+        <span class="order-page-bc-current">Lịch sử mua hàng</span>
+    </nav>
+
+    <div class="order-page-head">
+        <h1 class="order-page-title">Lịch sử mua hàng</h1>
+        <p class="order-page-sub">Tất cả đơn đã đặt — mới nhất lên trước</p>
+    </div>
+
+    @if (Model != null && Model.DataItems.Any())
+    {
+        <div class="order-history-shell">
+            <div class="order-history-head" aria-hidden="true">
+                <span>Mã đơn</span>
+                <span>Ngày đặt</span>
+                <span>Trạng thái</span>
+                <span>Tổng tiền</span>
+                <span></span>
+            </div>
+            <div class="order-history-list">
+                @foreach (var order in Model.DataItems.OrderByDescending(o => o.OrderTime))
+                {
+                    <partial name="_OrderHistoryRow" model="order" />
+                }
+            </div>
+        </div>
+
+        @if (Model.PageCount > 1)
+        {
+            <div class="pagination-wrap">
+                <ul class="pagination">
+                    @foreach (var p in Model.GetDisplayPages())
+                    {
+                        if (p.IsEllipsis)
+                        {
+                            <li><span>...</span></li>
+                        }
+                        else
+                        {
+                            <li>
+                                <a class="@(p.IsCurrent ? "active" : "")"
+                                   href="~/Order/@pagAction?page=@p.Page">
+                                    @p.Page
+                                </a>
+                            </li>
+                        }
+                    }
+                </ul>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-icon">📦</div>
+            <div class="empty-title">Chưa có lịch sử mua hàng</div>
+            <div class="empty-desc">Các đơn hàng sau khi đặt sẽ hiển thị tại đây</div>
+            <a href="~/Product" class="empty-btn">🛍️ Bắt đầu mua sắm</a>
+        </div>
+    }
+</div>

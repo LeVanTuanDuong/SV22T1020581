@@ -1,0 +1,124 @@
+@model SV22T1020581.Models.Partner.Shipper
+@{
+    ViewBag.Title = ViewBag.Title ?? "Người giao hàng";
+}
+<style>
+    .field-error {
+        border-color: #dc3545 !important;
+        background-color: #fff8f8 !important;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.15);
+    }
+    .field-error-message {
+        color: #dc3545;
+        font-size: 0.85rem;
+        margin-top: 4px;
+        display: none;
+    }
+    .field-error-message.show {
+        display: block;
+    }
+</style>
+@section PageToolBar {
+    <button type="submit" form="formEdit" class="btn btn-primary">
+        <i class="bi bi-save"></i>
+        Lưu dữ liệu
+    </button>
+    <a href="~/Shipper" class="btn btn-secondary ms-1">
+        <i class="bi bi-arrow-left"></i>
+        Quay lại
+    </a>
+}
+
+<div class="row justify-content-center">
+    <div class="col-12">
+        <div class="card card-primary card-outline">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-bicycle me-2"></i>
+                    Thông tin người giao hàng
+                </h5>
+            </div>
+
+            <div class="card-body">
+                <form id="formEdit" action="~/Shipper/Save" method="post" novalidate>
+                    <input type="hidden" name="ShipperID" value="@Model.ShipperID" />
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tên người giao hàng:</label>
+                        <input type="text"
+                               name="ShipperName"
+                               id="ShipperName"
+                               value="@Model.ShipperName"
+                               class="form-control"
+                               placeholder="Nhập tên người giao hàng"
+                               autofocus />
+                        <div class="field-error-message" id="ShipperName-error">Vui lòng nhập Tên người giao hàng</div>
+                        @Html.ValidationMessage("ShipperName", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Điện thoại:</label>
+                        <input type="tel"
+                               name="Phone"
+                               id="Phone"
+                               value="@Model.Phone"
+                               class="form-control"
+                               placeholder="Nhập số điện thoại" />
+                        <div class="field-error-message" id="Phone-error">Vui lòng nhập Điện thoại</div>
+                        <div class="field-error-message" id="Phone-notdigit-error">Số điện thoại chỉ được nhập số (0-9) và dấu chấm (.)</div>
+                        @Html.ValidationMessage("Phone", new { @class = "text-danger" })
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('formEdit').addEventListener('submit', function (e) {
+        var isValid = true;
+        var fields = [
+            { id: 'ShipperName', errorId: 'ShipperName-error' },
+            { id: 'Phone', errorId: 'Phone-error' }
+        ];
+
+        fields.forEach(function (field) {
+            var input = document.getElementById(field.id);
+            var errorMsg = document.getElementById(field.errorId);
+            if (!input || !errorMsg) return;
+
+            input.classList.remove('field-error');
+            errorMsg.classList.remove('show');
+
+            var value = input.value.trim();
+            if (value === '') {
+                input.classList.add('field-error');
+                errorMsg.classList.add('show');
+                isValid = false;
+            }
+
+            if (field.id === 'Phone' && value !== '' && !/^[\d.]+$/.test(value)) {
+                input.classList.add('field-error');
+                document.getElementById('Phone-error').classList.remove('show');
+                document.getElementById('Phone-notdigit-error').classList.add('show');
+                isValid = false;
+            }
+        });
+
+        if (!isValid) {
+            e.preventDefault();
+        }
+    });
+
+    ['ShipperName', 'Phone'].forEach(function (id) {
+        var input = document.getElementById(id);
+        if (!input) return;
+        input.addEventListener('input', function () {
+            input.classList.remove('field-error');
+            var errorMsg = document.getElementById(id + '-error');
+            if (errorMsg) errorMsg.classList.remove('show');
+            var notDigit = document.getElementById(id + '-notdigit-error');
+            if (notDigit) notDigit.classList.remove('show');
+        });
+    });
+</script>

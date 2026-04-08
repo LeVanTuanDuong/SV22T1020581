@@ -1,0 +1,113 @@
+﻿@model SV22T1020581.Models.Catalog.Category
+@{
+    ViewBag.Title = "Cập nhật loại hàng";
+}
+<style>
+    .field-error {
+        border-color: #dc3545 !important;
+        background-color: #fff8f8 !important;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.15);
+    }
+    .field-error-message {
+        color: #dc3545;
+        font-size: 0.85rem;
+        margin-top: 4px;
+        display: none;
+    }
+    .field-error-message.show {
+        display: block;
+    }
+</style>
+@section PageToolBar {
+    <button type="submit" form="formEdit" class="btn btn-primary">
+        <i class="bi bi-save"></i>
+        Lưu dữ liệu
+    </button>
+    <a href="~/Category" class="btn btn-secondary ms-1">
+        <i class="bi bi-arrow-left"></i>
+        Quay lại
+    </a>
+}
+
+<div class="row justify-content-center">
+    <div class="col-12">
+        <div class="card card-primary card-outline">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-tags me-2"></i>
+                    Thông tin loại hàng
+                </h5>
+            </div>
+
+            <div class="card-body">
+                <form id="formEdit" action="~/Category/Save" method="post" novalidate>
+                    <input type="hidden" name="CategoryID" value="@Model.CategoryID" />
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tên loại hàng:</label>
+                        <input type="text"
+                               name="CategoryName"
+                               id="CategoryName"
+                               value="@Model.CategoryName"
+                               class="form-control"
+                               placeholder="Nhập tên loại hàng"
+                               autofocus />
+                        <div class="field-error-message" id="CategoryName-error">Vui lòng nhập Tên loại hàng</div>
+                        @Html.ValidationMessage("CategoryName", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Mô tả:</label>
+                        <textarea name="Description"
+                                  id="Description"
+                                  class="form-control"
+                                  rows="4"
+                                  placeholder="Nhập mô tả loại hàng">@Model.Description</textarea>
+                        <div class="field-error-message" id="Description-error">Vui lòng nhập Mô tả loại hàng</div>
+                        @Html.ValidationMessage("Description", new { @class = "text-danger" })
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('formEdit').addEventListener('submit', function (e) {
+        var isValid = true;
+        var fields = [
+            { id: 'CategoryName', errorId: 'CategoryName-error' },
+            { id: 'Description', errorId: 'Description-error' }
+        ];
+
+        fields.forEach(function (field) {
+            var input = document.getElementById(field.id);
+            var errorMsg = document.getElementById(field.errorId);
+            if (!input || !errorMsg) return;
+
+            input.classList.remove('field-error');
+            errorMsg.classList.remove('show');
+
+            var value = input.value.trim();
+            if (value === '') {
+                input.classList.add('field-error');
+                errorMsg.classList.add('show');
+                isValid = false;
+            }
+        });
+
+        if (!isValid) {
+            e.preventDefault();
+        }
+    });
+
+    ['CategoryName', 'Description'].forEach(function (id) {
+        var input = document.getElementById(id);
+        if (!input) return;
+        input.addEventListener('input', function () {
+            input.classList.remove('field-error');
+            var errorMsg = document.getElementById(id + '-error');
+            if (errorMsg) errorMsg.classList.remove('show');
+        });
+    });
+</script>

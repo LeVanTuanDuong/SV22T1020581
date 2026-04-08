@@ -1,0 +1,17 @@
+@{
+    int totalQty = Model;
+}
+@if (totalQty > 0)
+{
+    <span id="cartBadge" class="position-absolute badge rounded-pill bg-danger"
+          style="top: -6px; right: -6px; font-size: 0.65rem;">
+        @(totalQty > 99 ? "99+" : totalQty)
+    </span>
+}
+else
+{
+    <span id="cartBadge" class="position-absolute badge rounded-pill bg-danger"
+          style="top: -6px; right: -6px; font-size: 0.65rem; display: none;">
+        0
+    </span>
+}

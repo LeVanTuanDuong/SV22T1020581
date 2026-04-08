@@ -1,0 +1,255 @@
+﻿@model SV22T1020581.Models.Catalog.Product
+@using SV22T1020581.Models.Catalog
+@using SV22T1020581.Models.Partner
+@{
+    IEnumerable<Category> categoryOptions = ViewBag.Categories as IEnumerable<Category> ?? Enumerable.Empty<Category>();
+    IEnumerable<Supplier> supplierOptions = ViewBag.Suppliers as IEnumerable<Supplier> ?? Enumerable.Empty<Supplier>();
+}
+<style>
+    .field-error {
+        border-color: #dc3545 !important;
+        background-color: #fff8f8 !important;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.15);
+    }
+    .field-error-message {
+        color: #dc3545;
+        font-size: 0.85rem;
+        margin-top: 4px;
+        display: none;
+    }
+    .field-error-message.show {
+        display: block;
+    }
+</style>
+@section PageToolBar {
+    <button type="submit" form="formEdit" class="btn btn-primary">
+        <i class="bi bi-save"></i>
+        Lưu dữ liệu
+    </button>
+
+    <a href="~/Product" class="btn btn-secondary ms-1">
+        <i class="bi bi-arrow-left"></i>
+        Quay lại
+    </a>
+}
+
+<div class="row justify-content-center">
+    <div class="col-12">
+        <div class="card card-primary card-outline">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-box-seam me-2"></i>
+                    Thông tin mặt hàng
+                </h5>
+            </div>
+
+            <div class="card-body">
+                <form id="formEdit" method="post" action="~/Product/Save" enctype="multipart/form-data" novalidate>
+                    <input type="hidden" name="ProductID" value="@Model.ProductID" />
+
+                    <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label fw-bold">Tên mặt hàng:</label>
+                        <div class="col-sm-9">
+                            <input type="text"
+                                   class="form-control"
+                                   name="ProductName"
+                                   id="ProductName"
+                                   value="@Model.ProductName"
+                                   placeholder="Nhập tên mặt hàng"
+                                   autofocus />
+                            <div class="field-error-message" id="ProductName-error">Vui lòng nhập Tên mặt hàng</div>
+                            @Html.ValidationMessage("ProductName", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label fw-bold">Loại hàng:</label>
+                        <div class="col-sm-3">
+                            <select class="form-select" name="CategoryID" id="CategoryID">
+                                <option value="">-- Chọn loại hàng --</option>
+                                @foreach (var c in categoryOptions)
+                                {
+                                    if (c.CategoryID == Model.CategoryID)
+                                    {
+                                        <option value="@c.CategoryID" selected>@c.CategoryName</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@c.CategoryID">@c.CategoryName</option>
+                                    }
+                                }
+                            </select>
+                            <div class="field-error-message" id="CategoryID-error">Vui lòng nhập Loại hàng</div>
+                            @Html.ValidationMessage("CategoryID", new { @class = "text-danger" })
+                        </div>
+
+                        <label class="col-sm-2 col-form-label text-end fw-bold">Nhà cung cấp:</label>
+                        <div class="col-sm-4">
+                            <select class="form-select" name="SupplierID" id="SupplierID">
+                                <option value="">-- Chọn nhà cung cấp --</option>
+                                @foreach (var s in supplierOptions)
+                                {
+                                    if (s.SupplierID == Model.SupplierID)
+                                    {
+                                        <option value="@s.SupplierID" selected>@s.SupplierName</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@s.SupplierID">@s.SupplierName</option>
+                                    }
+                                }
+                            </select>
+                            <div class="field-error-message" id="SupplierID-error">Vui lòng nhập Nhà cung cấp</div>
+                            @Html.ValidationMessage("SupplierID", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label fw-bold">Đơn vị tính:</label>
+                        <div class="col-sm-3">
+                            <input type="text"
+                                   class="form-control"
+                                   name="Unit"
+                                   id="Unit"
+                                   value="@Model.Unit"
+                                   placeholder="cái, hộp, kg..." />
+                            <div class="field-error-message" id="Unit-error">Vui lòng nhập Đơn vị tính</div>
+                            @Html.ValidationMessage("Unit", new { @class = "text-danger" })
+                        </div>
+
+                        <label class="col-sm-2 col-form-label text-end fw-bold">Giá:</label>
+                        <div class="col-sm-4">
+                            <input type="number"
+                                   class="form-control"
+                                   name="Price"
+                                   id="Price"
+                                   value="@Model.Price"
+                                   placeholder="Giá bán"
+                                   min="0"
+                                   step="1000" />
+                            <div class="field-error-message" id="Price-error">Vui lòng nhập Giá (lớn hơn 0)</div>
+                            @Html.ValidationMessage("Price", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label fw-bold">Trạng thái:</label>
+                        <div class="col-sm-9">
+                            <div class="form-check form-switch mt-2">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       name="IsSelling"
+                                       id="IsSelling"
+                                       value="true"
+                                       checked="@(Model.IsSelling)" />
+                                <label class="form-check-label" for="IsSelling">
+                                    Đang bán
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label fw-bold">Ảnh:</label>
+                        <div class="col-sm-9">
+                            <!-- Giữ ảnh cũ nếu không chọn ảnh mới -->
+                            <input type="hidden" name="Photo" value="@Model.Photo" />
+                            <input type="file"
+                                   class="form-control"
+                                   name="uploadPhoto"
+                                   accept="image/*"
+                                   data-img-preview="imgPreview"
+                                   onchange="previewImage(this)" />
+                            <div class="mt-2">
+                                <img id="imgPreview"
+                                     src="@(string.IsNullOrEmpty(Model.Photo) ? "/images/products/nophoto.png" : "/images/products/" + Model.Photo)"
+                                     class="img-thumbnail"
+                                     style="max-height: 160px;" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label fw-bold">Mô tả:</label>
+                        <div class="col-sm-9">
+                            <textarea class="form-control"
+                                      name="ProductDescription"
+                                      rows="3"
+                                      placeholder="Nhập mô tả mặt hàng">@Model.ProductDescription</textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@{
+    await Html.RenderPartialAsync("ListPhotos");
+    await Html.RenderPartialAsync("ListAttributes");
+}
+
+<script>
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            document.getElementById('imgPreview').src = window.URL.createObjectURL(input.files[0]);
+        }
+    }
+
+    document.getElementById('formEdit').addEventListener('submit', function (e) {
+        var isValid = true;
+        var fields = [
+            { id: 'ProductName', errorId: 'ProductName-error' },
+            { id: 'CategoryID', errorId: 'CategoryID-error' },
+            { id: 'SupplierID', errorId: 'SupplierID-error' },
+            { id: 'Unit', errorId: 'Unit-error' },
+            { id: 'Price', errorId: 'Price-error' }
+        ];
+
+        fields.forEach(function (field) {
+            var input = document.getElementById(field.id);
+            var errorMsg = document.getElementById(field.errorId);
+            if (!input || !errorMsg) return;
+
+            input.classList.remove('field-error');
+            errorMsg.classList.remove('show');
+
+            var value = input.value.trim();
+            var isEmpty = value === '' || value === '-- Chọn loại hàng --' || value === '-- Chọn nhà cung cấp --';
+
+            if (field.id === 'Price' && !isEmpty) {
+                if (parseFloat(value) <= 0 || isNaN(parseFloat(value))) {
+                    input.classList.add('field-error');
+                    errorMsg.classList.add('show');
+                    isValid = false;
+                    return;
+                }
+            }
+
+            if (isEmpty) {
+                input.classList.add('field-error');
+                errorMsg.classList.add('show');
+                isValid = false;
+            }
+        });
+
+        if (!isValid) {
+            e.preventDefault();
+        }
+    });
+
+    ['ProductName', 'CategoryID', 'SupplierID', 'Unit', 'Price'].forEach(function (id) {
+        var input = document.getElementById(id);
+        if (!input) return;
+        input.addEventListener('input', function () {
+            input.classList.remove('field-error');
+            var errorMsg = document.getElementById(id + '-error');
+            if (errorMsg) errorMsg.classList.remove('show');
+        });
+        input.addEventListener('change', function () {
+            input.classList.remove('field-error');
+            var errorMsg = document.getElementById(id + '-error');
+            if (errorMsg) errorMsg.classList.remove('show');
+        });
+    });
+</script>

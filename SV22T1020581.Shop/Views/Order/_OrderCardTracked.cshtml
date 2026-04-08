@@ -1,0 +1,91 @@
+@model SV22T1020581.Models.Sales.OrderViewInfo
+@{
+    var activeStep = Model.Status switch
+    {
+        1 => 1,
+        2 => 2,
+        3 => 3,
+        4 => 4,
+        _ => 0
+    };
+    var isTerminal = Model.Status is -1 or -2;
+    var badgeClass = Model.Status switch
+    {
+        1 => "order-track-badge--new",
+        2 => "order-track-badge--process",
+        3 => "order-track-badge--ship",
+        4 => "order-track-badge--done",
+        -1 or -2 => "order-track-badge--bad",
+        _ => "order-track-badge--new"
+    };
+    var badgeText = Model.Status switch
+    {
+        1 => "Đơn hàng vừa gửi · chờ xác nhận",
+        2 => "Đang xử lý",
+        3 => "Đang giao hàng",
+        4 => "Đã giao hàng",
+        -1 => "Đơn đã hủy",
+        -2 => "Đơn bị từ chối",
+        _ => Model.StatusDescription
+    };
+    var steps = new[] { "Chờ xác nhận", "Đang xử lý", "Đang giao", "Đã giao" };
+}
+<div class="order-track-card">
+    <div class="order-track-top">
+        <div class="order-track-id">#@Model.OrderID</div>
+        <span class="order-track-badge @badgeClass">@badgeText</span>
+    </div>
+    <div class="order-track-meta">
+        <span class="order-track-meta-icon" aria-hidden="true">📅</span>
+        <span>@Model.OrderTime.ToString("dd/MM/yyyy HH:mm") — @(string.IsNullOrWhiteSpace(Model.CustomerName) ? "Khách hàng" : Model.CustomerName)</span>
+    </div>
+
+    <div class="order-stepper-wrap">
+    <div class="order-stepper @(isTerminal ? "order-stepper--terminal" : "")" role="list" aria-label="Tiến trình đơn hàng">
+        @for (var i = 0; i < 4; i++)
+        {
+            var n = i + 1;
+            string stepState;
+            if (isTerminal || activeStep == 0)
+                stepState = "muted";
+            else if (n < activeStep)
+                stepState = "done";
+            else if (n == activeStep)
+                stepState = "active";
+            else
+                stepState = "pending";
+
+            <div class="order-step order-step--@stepState" role="listitem">
+                <div class="order-step-inner">
+                    <div class="order-step-circle">@n</div>
+                    <div class="order-step-label">@steps[i]</div>
+                </div>
+                @if (i < 3)
+                {
+                    var barFill = !isTerminal && activeStep >= n + 1;
+                    <div class="order-step-bar order-step-bar--@(barFill ? "fill" : "empty")" aria-hidden="true"></div>
+                }
+            </div>
+        }
+    </div>
+    </div>
+    @if (isTerminal)
+    {
+        <p class="order-track-terminal-note">Đơn này không còn trong quy trình giao hàng.</p>
+    }
+
+    <div class="order-track-body">
+        <div class="order-track-address">
+            <div>@(string.IsNullOrWhiteSpace(Model.CustomerPhone) ? "—" : Model.CustomerPhone)@(string.IsNullOrWhiteSpace(Model.DeliveryProvince) ? "" : $" · {Model.DeliveryProvince}")</div>
+            <div class="order-track-address-line">@(string.IsNullOrWhiteSpace(Model.DeliveryAddress) ? "—" : Model.DeliveryAddress)</div>
+        </div>
+    </div>
+
+    <div class="order-track-bottom">
+        <a href="~/Order/Detail/@Model.OrderID" class="order-track-detail-btn">Chi tiết →</a>
+        <div class="order-track-total">
+            <span class="order-track-total-label">Tổng cộng</span>
+            <span class="order-track-total-val">@Model.TotalAmount.ToString("N0")đ</span>
+        </div>
+    </div>
+</div>

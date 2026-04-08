@@ -1,0 +1,199 @@
+@model SV22T1020581.Models.Partner.Customer
+<style>
+    .field-error {
+        border-color: #dc3545 !important;
+        background-color: #fff8f8 !important;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.15);
+    }
+    .field-error-message {
+        color: #dc3545;
+        font-size: 0.85rem;
+        margin-top: 4px;
+        display: none;
+    }
+    .field-error-message.show {
+        display: block;
+    }
+</style>
+
+<div class="card card-primary card-outline shadow-sm">
+    <div class="card-header">
+        <h3 class="card-title fw-bold text-primary">
+            <i class="bi bi-person-gear"></i> Thiết lập thông tin khách hàng
+        </h3>
+    </div>
+
+    <form id="formCustomer" action="/Customer/Save" method="post" novalidate>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Tên khách hàng:</label>
+                    <input type="text"
+                           class="form-control"
+                           name="CustomerName"
+                           id="CustomerName"
+                           value="@Model.CustomerName"
+                           placeholder="Nhập tên khách hàng" autofocus />
+                    <div class="field-error-message" id="CustomerName-error">Vui lòng nhập Tên khách hàng</div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Tên giao dịch:</label>
+                    <input type="text"
+                           class="form-control"
+                           name="ContactName"
+                           id="ContactName"
+                           value="@Model.ContactName"
+                           placeholder="Nhập tên giao dịch" />
+                    <div class="field-error-message" id="ContactName-error">Vui lòng nhập Tên giao dịch</div>
+                </div>
+            </div>
+
+            <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Điện thoại:</label>
+                        <input type="tel"
+                               class="form-control"
+                               name="Phone"
+                               id="Phone"
+                               value="@Model.Phone"
+                               placeholder="Nhập số điện thoại" />
+                    </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Email:</label>
+                    <input type="email"
+                           class="form-control"
+                           name="Email"
+                           id="Email"
+                           value="@Model.Email"
+                           placeholder="Nhập địa chỉ email" />
+                    <div class="field-error-message" id="Email-error">Vui lòng nhập Email</div>
+                    <div class="field-error-message" id="Email-at-error">Email phải chứa ký tự @@</div>
+                </div>
+            </div>
+
+            <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Địa chỉ:</label>
+                        <input type="text"
+                               class="form-control"
+                               name="Address"
+                               id="Address"
+                               value="@Model.Address"
+                               placeholder="Nhập địa chỉ" />
+                    </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Tỉnh / Thành:</label>
+                    <select class="form-select" name="Province" id="Province">
+                        <option value="">-- Chọn tỉnh / thành --</option>
+                        @foreach (var p in (IReadOnlyList<SV22T1020581.Models.DataDictionary.Province>)(ViewBag.Provinces ?? new List<SV22T1020581.Models.DataDictionary.Province>()))
+                        {
+                            if (p.ProvinceName == Model.Province)
+                            {
+                                <option value="@p.ProvinceName" selected>@p.ProvinceName</option>
+                            }
+                            else
+                            {
+                                <option value="@p.ProvinceName">@p.ProvinceName</option>
+                            }
+                        }
+                    </select>
+                    <div class="field-error-message" id="Province-error">Vui lòng nhập Tỉnh / Thành</div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold d-block">Trạng thái:</label>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="IsLocked" id="active" value="false" checked>
+                    <label class="form-check-label text-success" for="active">Đang hoạt động</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="IsLocked" id="locked" value="true">
+                    <label class="form-check-label text-danger" for="locked">Bị khóa</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer text-end">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-save"></i> Lưu dữ liệu
+            </button>
+            <a href="/Customer" class="btn btn-secondary border">Quay lại</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.getElementById('formCustomer').addEventListener('submit', function (e) {
+        var isValid = true;
+        var fields = [
+            { id: 'CustomerName', errorId: 'CustomerName-error' },
+            { id: 'ContactName', errorId: 'ContactName-error' },
+            { id: 'Email', errorId: 'Email-error' },
+            { id: 'Province', errorId: 'Province-error' }
+        ];
+
+        fields.forEach(function (field) {
+            var input = document.getElementById(field.id);
+            var errorMsg = document.getElementById(field.errorId);
+            if (!input || !errorMsg) return;
+
+            input.classList.remove('field-error');
+            errorMsg.classList.remove('show');
+
+            var value = input.value.trim();
+            var isEmpty = value === '' || value === '-- Chọn tỉnh / thành --';
+
+            if (field.id === 'Email' && !isEmpty) {
+                if (!value.toLowerCase().includes('@@')) {
+                    input.classList.add('field-error');
+                    errorMsg.classList.add('show');
+                    isValid = false;
+                    return;
+                }
+            }
+
+            if (field.id === 'Phone' && !isEmpty) {
+                if (!/^[\d.]+$/.test(value)) {
+                    input.classList.add('field-error');
+                    document.getElementById('Phone-error').classList.remove('show');
+                    document.getElementById('Phone-notdigit-error').classList.add('show');
+                    isValid = false;
+                    return;
+                }
+            }
+
+            if (isEmpty) {
+                input.classList.add('field-error');
+                errorMsg.classList.add('show');
+                isValid = false;
+            }
+        });
+
+        if (!isValid) {
+            e.preventDefault();
+        }
+    });
+
+    ['CustomerName', 'ContactName', 'Email', 'Province'].forEach(function (id) {
+        var input = document.getElementById(id);
+        if (!input) return;
+        input.addEventListener('input', function () {
+            input.classList.remove('field-error');
+            var errorMsg = document.getElementById(id + '-error');
+            if (errorMsg) errorMsg.classList.remove('show');
+            var notDigit = document.getElementById(id + '-notdigit-error');
+            if (notDigit) notDigit.classList.remove('show');
+        });
+        input.addEventListener('change', function () {
+            input.classList.remove('field-error');
+            var errorMsg = document.getElementById(id + '-error');
+            if (errorMsg) errorMsg.classList.remove('show');
+            var notDigit = document.getElementById(id + '-notdigit-error');
+            if (notDigit) notDigit.classList.remove('show');
+        });
+    });
+</script>

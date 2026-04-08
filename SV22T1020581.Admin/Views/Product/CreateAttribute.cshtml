@@ -1,0 +1,29 @@
+﻿<div class="card shadow-sm border-0 border-top border-primary border-4">
+    <div class="card-body p-4">
+        <h5 class="fw-bold mb-4 text-slate-800">@ViewBag.Title</h5>
+        <form action="~/Product/SaveAttribute" method="post">
+            <input type="hidden" name="ProductID" value="@ViewBag.ProductID" />
+            <input type="hidden" name="AttributeID" value="@ViewBag.AttributeID" />
+
+            <div class="row g-3">
+                <div class="col-md-5">
+                    <label class="form-label small fw-bold text-muted">Tên thuộc tính</label>
+                    <input type="text" name="AttributeName" class="form-control shadow-none border-zinc-200" placeholder="VD: Kích thước, Trọng lượng..." required>
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label small fw-bold text-muted">Giá trị</label>
+                    <input type="text" name="AttributeValue" class="form-control shadow-none border-zinc-200" placeholder="VD: XL, 500g..." required>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold text-muted">Thứ tự hiển thị</label>
+                    <input type="number" name="DisplayOrder" class="form-control shadow-none border-zinc-200" value="1">
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary px-4">Lưu thuộc tính</button>
+                <a href="~/Product/Edit/@ViewBag.ProductID" class="btn btn-outline-secondary px-4">Hủy bỏ</a>
+            </div>
+        </form>
+    </div>
+</div>

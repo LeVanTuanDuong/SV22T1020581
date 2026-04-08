@@ -1,0 +1,80 @@
+@model SV22T1020581.Shop.Controllers.EditProfileViewModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Thay đổi thông tin — TechZone";
+    var ud = (User as ClaimsPrincipal)?.GetUserData();
+    var sidebarName = !string.IsNullOrWhiteSpace(ud?.DisplayName)
+        ? ud!.DisplayName
+        : (!string.IsNullOrWhiteSpace(ud?.UserName) ? ud.UserName : User.Identity?.Name ?? "Khách hàng");
+    var sidebarEmail = !string.IsNullOrWhiteSpace(ud?.Email) ? ud!.Email : "";
+}
+
+<div class="profile-layout">
+    <div class="profile-sidebar">
+        <div class="profile-avatar">
+            @(sidebarName.Length > 0 ? sidebarName[0].ToString().ToUpper() : "?")
+        </div>
+        <div class="profile-name">@sidebarName</div>
+        <div class="profile-email">@sidebarEmail</div>
+        <ul class="profile-menu">
+            <li onclick="window.location.href='/Account/Profile'" style="cursor:pointer;">👤 Thông tin cá nhân</li>
+            <li class="active">✏️ Thay đổi thông tin</li>
+            <li onclick="window.location.href='/Account/ChangePassword'" style="cursor:pointer;">🔑 Đổi mật khẩu</li>
+            <li onclick="window.location.href='/Order/MyOrders'" style="cursor:pointer;">📋 Đơn hàng (theo trạng thái)</li>
+            <li onclick="window.location.href='/Order/PurchaseHistory'" style="cursor:pointer;">🕐 Lịch sử mua hàng</li>
+            <li class="danger" onclick="window.location.href='/Account/Logout'" style="cursor:pointer;">🚪 Đăng xuất</li>
+        </ul>
+    </div>
+
+    <div class="profile-content">
+        <div class="section-title-profile">✏️ Thay đổi thông tin cá nhân</div>
+
+        <form asp-action="EditProfile" method="post" style="max-width:520px;">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger" style="font-size:.84rem;margin-bottom:12px;"></div>
+
+            <div class="form-group">
+                <label class="form-label" asp-for="CustomerName"></label>
+                <input class="form-control" asp-for="CustomerName" autocomplete="name" />
+                <span asp-validation-for="CustomerName" class="text-danger" style="font-size:.78rem;"></span>
+            </div>
+            <div class="form-group">
+                <label class="form-label" asp-for="ContactName"></label>
+                <input class="form-control" asp-for="ContactName" autocomplete="nickname" />
+                <span asp-validation-for="ContactName" class="text-danger" style="font-size:.78rem;"></span>
+            </div>
+            <div class="form-group">
+                <label class="form-label" asp-for="Email"></label>
+                <input class="form-control" asp-for="Email" autocomplete="email" />
+                <span asp-validation-for="Email" class="text-danger" style="font-size:.78rem;"></span>
+            </div>
+            <div class="form-group">
+                <label class="form-label" asp-for="Phone"></label>
+                <input class="form-control" asp-for="Phone" autocomplete="tel" />
+                <span asp-validation-for="Phone" class="text-danger" style="font-size:.78rem;"></span>
+            </div>
+            <div class="form-group">
+                <label class="form-label" asp-for="Province"></label>
+                <select asp-for="Province" asp-items="ViewBag.Provinces" class="form-control"></select>
+                <span asp-validation-for="Province" class="text-danger" style="font-size:.78rem;"></span>
+            </div>
+            <div class="form-group">
+                <label class="form-label" asp-for="Address"></label>
+                <input class="form-control" asp-for="Address" autocomplete="street-address" />
+                <span asp-validation-for="Address" class="text-danger" style="font-size:.78rem;"></span>
+            </div>
+
+            <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap;">
+                <button type="submit" class="save-btn">Lưu thay đổi</button>
+                <a href="~/Account/Profile"
+                   style="display:inline-flex;align-items:center;padding:12px 20px;border:1.5px solid var(--border);border-radius:var(--radius-sm);text-decoration:none;font-size:.84rem;color:var(--grey);transition:var(--transition);">
+                    Hủy
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,42 @@
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Đặt hàng thành công — TechZone";
+}
+@model SV22T1020581.Models.Sales.OrderViewInfo
+
+<div class="success-wrap">
+    <div class="success-card">
+        <div class="success-icon">🎉</div>
+        <div class="success-title">Đặt hàng thành công!</div>
+        <div class="success-sub">
+            Cảm ơn bạn đã đặt hàng tại TechZone.<br>
+            Chúng tôi sẽ liên hệ để xác nhận đơn hàng trong thời gian sớm nhất.
+        </div>
+
+        <div class="order-info-card">
+            <div class="info-row">
+                <span class="lbl">Mã đơn hàng</span>
+                <span class="val">#@Model.OrderID</span>
+            </div>
+            <div class="info-row">
+                <span class="lbl">Ngày đặt</span>
+                <span class="val">@Model.OrderTime.ToString("dd/MM/yyyy HH:mm")</span>
+            </div>
+            <div class="info-row">
+                <span class="lbl">Tổng tiền</span>
+                <span class="val blue">@Model.TotalAmount.ToString("N0")đ</span>
+            </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:10px;">
+            <a href="~/Order/Detail/@Model.OrderID"
+               class="checkout-btn" style="display:block;text-align:center;text-decoration:none;">
+                📦 Xem chi tiết đơn hàng
+            </a>
+            <a href="~/Product"
+               style="display:block;text-align:center;padding:12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);text-decoration:none;font-size:.84rem;color:var(--grey);transition:var(--transition);">
+                ← Tiếp tục mua sắm
+            </a>
+        </div>
+    </div>
+</div>

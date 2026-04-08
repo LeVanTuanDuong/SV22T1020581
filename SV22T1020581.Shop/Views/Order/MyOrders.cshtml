@@ -1,0 +1,68 @@
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = ViewBag.Title ?? "Đơn hàng — TechZone";
+    var pagAction = ViewBag.OrdersListAction as string ?? "MyOrders";
+}
+@model SV22T1020581.Models.Common.PagedResult<SV22T1020581.Models.Sales.OrderViewInfo>
+
+<div class="orders-container order-page--tracked">
+    <nav class="order-page-bc" aria-label="Breadcrumb">
+        <a href="~/">Trang chủ</a>
+        <span class="order-page-bc-sep">›</span>
+        <span class="order-page-bc-current">Đơn hàng</span>
+    </nav>
+
+    <div class="order-page-head">
+        <h1 class="order-page-title">Đơn hàng</h1>
+        <p class="order-page-sub">Theo dõi tiến trình các đơn đang xử lý (chờ xác nhận, đang giao…)</p>
+    </div>
+
+    @if (Model != null && Model.DataItems.Any())
+    {
+        <div class="order-track-list">
+            @foreach (var order in Model.DataItems.OrderByDescending(o => o.OrderTime))
+            {
+                <partial name="_OrderCardTracked" model="order" />
+            }
+        </div>
+
+        <p class="order-page-crosslink">
+            Đơn đã giao / đã hủy:
+            <a href="~/Order/PurchaseHistory">Lịch sử mua hàng</a>
+            →
+        </p>
+
+        @if (Model.PageCount > 1)
+        {
+            <div class="pagination-wrap">
+                <ul class="pagination">
+                    @foreach (var p in Model.GetDisplayPages())
+                    {
+                        if (p.IsEllipsis)
+                        {
+                            <li><span>...</span></li>
+                        }
+                        else
+                        {
+                            <li>
+                                <a class="@(p.IsCurrent ? "active" : "")"
+                                   href="~/Order/@pagAction?page=@p.Page">
+                                    @p.Page
+                                </a>
+                            </li>
+                        }
+                    }
+                </ul>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-icon">📦</div>
+            <div class="empty-title">Bạn chưa có đơn hàng nào</div>
+            <div class="empty-desc">Hãy bắt đầu mua sắm để tạo đơn hàng đầu tiên</div>
+            <a href="~/Product" class="empty-btn">🛍️ Bắt đầu mua sắm</a>
+        </div>
+    }
+</div>

@@ -1,0 +1,193 @@
+<style>
+    .field-error {
+        border-color: #dc3545 !important;
+        background-color: #fff8f8 !important;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.15);
+    }
+    .field-error-message {
+        color: #dc3545;
+        font-size: 0.85rem;
+        margin-top: 4px;
+        display: none;
+    }
+    .field-error-message.show {
+        display: block;
+    }
+</style>
+
+<div class="card card-primary card-outline shadow-sm">
+    <div class="card-header">
+        <h3 class="card-title fw-bold text-primary"><i class="bi bi-person-add"></i> Thêm nhân viên mới</h3>
+    </div>
+    <form id="formEmployee" action="~/Employee/Save" method="post" enctype="multipart/form-data" novalidate>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Họ và tên:</label>
+                        <input type="text" class="form-control" name="FullName" id="FullName" placeholder="Nhập họ và tên nhân viên">
+                        <div class="field-error-message" id="FullName-error">Vui lòng nhập Họ và tên</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Email (Tài khoản):</label>
+                            <input type="email" class="form-control" name="Email" id="Email" placeholder="Nhập địa chỉ email">
+                            <div class="field-error-message" id="Email-error">Vui lòng nhập Email</div>
+                            <div class="field-error-message" id="Email-at-error">Email phải chứa ký tự @@</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Mật khẩu:</label>
+                            <input type="password" class="form-control" name="Password" id="Password" placeholder="Nhập mật khẩu">
+                            <div class="field-error-message" id="Password-error">Vui lòng nhập Mật khẩu</div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Xác nhận mật khẩu:</label>
+                            <input type="password" class="form-control" name="confirmPassword" id="ConfirmPassword" placeholder="Nhập lại mật khẩu">
+                            <div class="field-error-message" id="ConfirmPassword-error">Vui lòng nhập Xác nhận mật khẩu</div>
+                            <div class="field-error-message" id="ConfirmPassword-mismatch-error">Xác nhận mật khẩu không khớp</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Điện thoại:</label>
+                            <input type="tel" class="form-control" name="Phone" id="Phone" placeholder="Nhập số điện thoại">
+                            <div class="field-error-message" id="Phone-error">Vui lòng nhập Điện thoại</div>
+                            <div class="field-error-message" id="Phone-notdigit-error">Số điện thoại chỉ được nhập số (0-9) và dấu chấm (.)</div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Ngày sinh:</label>
+                            <input type="date" class="form-control" name="BirthDate" id="BirthDate">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Địa chỉ:</label>
+                            <input type="text" class="form-control" name="Address" id="Address" placeholder="Nhập địa chỉ">
+                            <div class="field-error-message" id="Address-error">Vui lòng nhập Địa chỉ</div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tỉnh / Thành:</label>
+                        <select class="form-select" name="Province" id="Province">
+                            <option value="">-- Chọn tỉnh / thành --</option>
+                            @foreach (var p in (IReadOnlyList<SV22T1020581.Models.DataDictionary.Province>)(ViewBag.Provinces ?? new List<SV22T1020581.Models.DataDictionary.Province>()))
+                            {
+                                <option value="@p.ProvinceName">@p.ProvinceName</option>
+                            }
+                        </select>
+                        <div class="field-error-message" id="Province-error">Vui lòng nhập Tỉnh / Thành</div>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center border-start">
+                    <label class="form-label fw-bold d-block text-start ps-3">Ảnh đại diện:</label>
+                    <div class="mb-3">
+                        <img id="PhotoPreview" src="~/images/employees/no-photo.png"
+                             class="img-thumbnail rounded-circle" style="width: 180px; height: 180px; object-fit: cover;">
+                    </div>
+                    <input type="file" class="form-control form-control-sm" name="uploadPhoto"
+                           accept="image/*"
+                           onchange="document.getElementById('PhotoPreview').src = window.URL.createObjectURL(this.files[0])">
+                </div>
+            </div>
+        </div>
+        <div class="card-footer text-end">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Lưu dữ liệu</button>
+            <a href="~/Employee" class="btn btn-secondary border">Quay lại</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.getElementById('formEmployee').addEventListener('submit', function (e) {
+        var isValid = true;
+        var fields = [
+            { id: 'FullName', errorId: 'FullName-error' },
+            { id: 'Email', errorId: 'Email-error' },
+            { id: 'Password', errorId: 'Password-error' },
+            { id: 'Phone', errorId: 'Phone-error' },
+            { id: 'Address', errorId: 'Address-error' },
+            { id: 'Province', errorId: 'Province-error' }
+        ];
+
+        fields.forEach(function (field) {
+            var input = document.getElementById(field.id);
+            var errorMsg = document.getElementById(field.errorId);
+            if (!input || !errorMsg) return;
+
+            input.classList.remove('field-error');
+            errorMsg.classList.remove('show');
+
+            var value = input.value.trim();
+            var isEmpty = value === '' || value === '-- Chọn tỉnh / thành --';
+
+            if (field.id === 'Email' && !isEmpty) {
+                if (!value.toLowerCase().includes('@@')) {
+                    input.classList.add('field-error');
+                    errorMsg.classList.add('show');
+                    isValid = false;
+                    return;
+                }
+            }
+
+            if (field.id === 'Phone' && !isEmpty) {
+                if (!/^[\d.]+$/.test(value)) {
+                    input.classList.add('field-error');
+                    document.getElementById('Phone-error').classList.remove('show');
+                    document.getElementById('Phone-notdigit-error').classList.add('show');
+                    isValid = false;
+                    return;
+                }
+            }
+
+            if (isEmpty) {
+                input.classList.add('field-error');
+                errorMsg.classList.add('show');
+                isValid = false;
+            }
+        });
+
+        // Confirm password
+        var password = document.getElementById('Password').value;
+        var confirmPassword = document.getElementById('ConfirmPassword').value;
+        document.getElementById('ConfirmPassword').classList.remove('field-error');
+        document.getElementById('ConfirmPassword-error').classList.remove('show');
+        document.getElementById('ConfirmPassword-mismatch-error').classList.remove('show');
+
+        if (confirmPassword === '') {
+            document.getElementById('ConfirmPassword').classList.add('field-error');
+            document.getElementById('ConfirmPassword-error').classList.add('show');
+            isValid = false;
+        } else if (password !== confirmPassword) {
+            document.getElementById('ConfirmPassword').classList.add('field-error');
+            document.getElementById('ConfirmPassword-mismatch-error').classList.add('show');
+            isValid = false;
+        }
+
+        if (!isValid) {
+            e.preventDefault();
+        }
+    });
+
+    ['FullName', 'Email', 'Password', 'Phone', 'Address', 'Province', 'ConfirmPassword'].forEach(function (id) {
+        var input = document.getElementById(id);
+        if (!input) return;
+        input.addEventListener('input', function () {
+            input.classList.remove('field-error');
+            var errorMsg = document.getElementById(id + '-error');
+            if (errorMsg) errorMsg.classList.remove('show');
+            var mismatch = document.getElementById(id + '-mismatch-error');
+            if (mismatch) mismatch.classList.remove('show');
+            var notDigit = document.getElementById(id + '-notdigit-error');
+            if (notDigit) notDigit.classList.remove('show');
+        });
+        input.addEventListener('change', function () {
+            input.classList.remove('field-error');
+            var errorMsg = document.getElementById(id + '-error');
+            if (errorMsg) errorMsg.classList.remove('show');
+            var mismatch = document.getElementById(id + '-mismatch-error');
+            if (mismatch) mismatch.classList.remove('show');
+            var notDigit = document.getElementById(id + '-notdigit-error');
+            if (notDigit) notDigit.classList.remove('show');
+        });
+    });
+</script>
